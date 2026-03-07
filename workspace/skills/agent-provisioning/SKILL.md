@@ -74,11 +74,17 @@ openclaw config set "agents.list[<INDEX>].tools.deny" \
 openclaw config validate
 ```
 
-### 步骤 6：重启 Gateway
+### 步骤 6：通过 Watcher Daemon 安全重启 Gateway（关键）
+
+Gateway 重启后你的进程会被杀掉，用户也收不到确认消息，甚至如果配置错误 Gateway 会崩溃。因此**绝对不能**直接调用 `openclaw gateway restart`。
+
+请运行系统自带的 Watcher 守护进程，它会负责安全的延时重启、故障自愈、大模型修复，并最终自动唤醒新角色！
 
 ```bash
-openclaw gateway restart
+nohup $HOME/.openclaw/workspace-hr/scripts/hr-provision-watcher.sh <agentId> > /tmp/hr-watcher.log 2>&1 &
 ```
+
+执行后，立即回复用户："✅ 新同事 <Agent名称> 的档案已建好！系统正由 Watcher 接管，将在后台进行安全校验与重启... 苏醒后新同事会亲自向您报告！"
 
 ### 步骤 7：验证
 

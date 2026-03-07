@@ -106,6 +106,13 @@ openclaw agents bind --agent <agentId> --bind discord:default
 
 ```bash
 openclaw agents list --bindings
-openclaw gateway restart
+
+# 提示：不需要在这里重启 Gateway。
+# 因为在此招聘流程的最后，一定要调用 `agent-provisioning` 里的 Watcher 脚本，
+# 那个脚本会在后台自动执行校验、延迟重启和新员工唤醒。
+```
+
+```bash
+# 重启完成后，可使用此命令检查健康状态（可选）：
 openclaw channels status --probe
 ```

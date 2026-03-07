@@ -137,11 +137,13 @@ for file in AGENTS.md SOUL.md IDENTITY.md USER.md TOOLS.md; do
     fi
 done
 
-# 复制 skills
+# 复制 skills 和 scripts
 if [ -d "$WORKSPACE_SRC/skills" ]; then
     cp -r "$WORKSPACE_SRC/skills/" "$HR_WORKSPACE/skills/"
     echo -e "  ${GREEN}✓${NC} skills/ (5 个技能)"
 fi
+cp -r "scripts/" "$HR_WORKSPACE/scripts/"
+echo -e "  ${GREEN}✓${NC} scripts/ (包含 Watcher Daemon)"
 
 # 复制 templates 到工作空间（供 skills 引用）
 if [ -d "$PROJECT_DIR/templates" ]; then
