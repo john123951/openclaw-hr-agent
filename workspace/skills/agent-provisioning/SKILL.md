@@ -35,7 +35,7 @@ openclaw agents set-identity --agent <agentId> \
 先查找 agent 在 `agents.list` 中的索引：
 
 ```bash
-openclaw config get agents.list --strict-json
+openclaw config get agents.list
 ```
 
 然后用索引设置配置：

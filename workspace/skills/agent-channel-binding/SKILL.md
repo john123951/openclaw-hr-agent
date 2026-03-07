@@ -58,8 +58,8 @@ openclaw config set \
 
 ```bash
 # 读取飞书凭据
-APP_ID=$(openclaw config get channels.feishu.accounts.main.appId)
-APP_SECRET=$(openclaw config get channels.feishu.accounts.main.appSecret)
+APP_ID=$(openclaw config get channels.feishu.appId | tail -n 1 | tr -d '"')
+APP_SECRET=$(openclaw config get channels.feishu.appSecret | tail -n 1 | tr -d '"')
 
 # 获取 tenant_access_token
 TOKEN=$(curl -s -X POST \
