@@ -42,8 +42,8 @@ hr-agent/
 │       └── job-profiles.json     # 预设的 8 种岗位配置文件
 ├── scripts/
 │   ├── install-hr-agent.sh       # 安装引导脚本：建立 HR
-│   └── hr-provision-watcher.sh   # 守护神守护脚本：后台安全重启与大模型抢救
-└── README_CN.md
+│   └── hr-gateway-watcher.sh   # 守护神守护脚本：后台安全重启与大模型抢救
+└── README_EN.md
 ```
 
 ## 🚀 极速安装
@@ -170,7 +170,7 @@ HR：档案创立中... ⏳
 
 ### 调校底层自动回滚大模型机制 (Watcher Daemon)
 
-打开 `scripts/hr-provision-watcher.sh`，内部包含了完整的 `claudecode -> codex -> gemini` 三重降落伞容错机制逻辑。当 OpenClaw 底层配置文件面临威胁时，它可以依靠纯命令行进行全自动原地修复。你可以自由拓展里面关于 AI 抢救时的自定义 prompt。
+打开 `scripts/hr-gateway-watcher.sh`，内部包含了完整的 `claudecode -> codex -> gemini` 三重降落伞容错机制逻辑。当 OpenClaw 底层配置文件面临威胁时，它可以依靠纯命令行进行全自动原地修复。你可以自由拓展里面关于 AI 抢救时的自定义 prompt。
 
 ## 📖 架构与设计准则
 

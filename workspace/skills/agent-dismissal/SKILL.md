@@ -51,8 +51,8 @@ fi
 echo "正在注销门禁卡和系统权限..."
 openclaw agents delete --force "$AGENT_ID"
 
-# 3. 异步安全重启系统生效
-nohup sh -c 'sleep 5 && openclaw gateway restart' >/dev/null 2>&1 &
+# 3. 异步安全重启系统生效 (由 Watcher 守护)
+nohup $HOME/.openclaw/workspace-hr/scripts/hr-gateway-watcher.sh "$AGENT_ID" dismiss > /tmp/hr-watcher.log 2>&1 &
 ```
 
 ### 3. 最后汇报

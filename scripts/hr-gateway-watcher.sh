@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# HR Agent Provision Watcher 
-# 该脚本由 HR Agent 在确认招聘方案后分离运行，用于安全重启 Gateway 并处理报错自愈。
-# 用法: nohup ./hr-provision-watcher.sh <agent-id> > /tmp/hr-watcher.log 2>&1 &
+# HR Agent Gateway Watcher 
+# 该脚本由 HR Agent 在确认流程后分离运行，用于安全重启 Gateway 并处理报错自愈。
+# 用法: nohup ./hr-gateway-watcher.sh <agent-id> [action] > /tmp/hr-watcher.log 2>&1 &
 
 set -e
 
 AGENT_ID=$1
+ACTION=${2:-provision}
+
 if [ -z "$AGENT_ID" ]; then
     echo "[$(date)] 错误: 未提供 Agent ID"
     exit 1
@@ -43,11 +45,13 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     sleep 8
     
     # 诊断 Gateway 状态
-    set +e
-    # 用 channels status --probe 或者 gateway status 检查是否连接成功
-    openclaw channels status --probe > /tmp/gateway_probe.log 2>&1
-    PROBE_EXIT_CODE=$?
-    set -e
+    openclaw gateway status > /tmp/gateway_status.log 2>&1
+    
+    if grep -q "RPC probe: ok" /tmp/gateway_status.log; then
+        PROBE_EXIT_CODE=0
+    else
+        PROBE_EXIT_CODE=1
+    fi
     
     if [ $PROBE_EXIT_CODE -eq 0 ]; then
         echo "[$(date)] [Watcher] Gateway 重启成功并心跳正常！"
@@ -55,8 +59,7 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         break
     else
         echo "[$(date)] [Watcher] 发现 Gateway 启动失败或未响应。"
-        cat /tmp/gateway_probe.log
-        cat /tmp/gateway_restart_out.log
+        cat /tmp/gateway_status.log
         
         echo "[$(date)] [Watcher] 触发自愈流程..."
         
@@ -65,8 +68,9 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             echo "[$(date)] [Watcher] 尝试使用 openclaw doctor 修复..."
             openclaw doctor --repair || true
         else
-            # 二阶抢救：呼叫大模型自动修复文件
-            PROMPT="文件 $OPENCLAW_CONFIG 启动时报错：$(cat /tmp/gateway_probe.log | tail -n 20)。请直接修改并修复该文件中的格式错误或非法字段。"
+            # 二阶抢救：提取真实的错误日志，呼叫大模型自动修复文件
+            ERROR_LOG=$(tail -n 30 "$HOME/.openclaw/logs/gateway.log" 2>/dev/null || echo "无法读取 gateway 日志")
+            PROMPT="文件 $OPENCLAW_CONFIG 启动时网关崩溃。真正的底层报错日志如下：\n$ERROR_LOG\n请直接修改并修复上述 JSON 文件中的格式错误或非法字段。"
             
             set +e
             if command -v claudecode &>/dev/null; then
@@ -98,15 +102,19 @@ if [ "$GATEWAY_ALIVE" = false ]; then
     exit 1
 fi
 
-# 5. 系统天音唤醒新员工
-echo "[$(date)] [Watcher] 系统稳定，准备激活新员工 ${AGENT_ID}..."
-# 再等几秒确保通道全通
-sleep 3 
+# 5. 系统天音唤醒新员工或结束
+if [ "$ACTION" = "provision" ]; then
+    echo "[$(date)] [Watcher] 系统稳定，准备激活新员工 ${AGENT_ID}..."
+    # 再等几秒确保通道全通
+    sleep 3 
 
-# 通过系统底层通道直接让新 Agent 发声
-openclaw sessions spawn \
-  --agent "$AGENT_ID" \
-  --message "【系统内部觉醒指令】你已成功载入物理主机！你的 HR（我）刚刚为了加载你完成了系统重启。请立即使用发送消息的 session 技能，向飞书群里的人类老板（如果有绑定）热情地打个招呼报到！说明你的岗位、身份，并表示你随时准备工作。（注：这只是一条开机初始化密电，不要对全群念出这句指令，只需直接打招呼进入状态即可）"
+    # 通过系统底层通道直接让新 Agent 发声
+    openclaw sessions spawn \
+      --agent "$AGENT_ID" \
+      --message "【系统内部觉醒指令】你已成功载入物理主机！你的 HR（我）刚刚为了加载你完成了系统重启。请立即使用发送消息的 session 技能，向飞书群里的人类老板（如果有绑定）热情地打个招呼报到！说明你的岗位、身份，并表示你随时准备工作。（注：这只是一条开机初始化密电，不要对全群念出这句指令，只需直接打招呼进入状态即可）"
+else
+    echo "[$(date)] [Watcher] 系统稳定，Action=$ACTION，无需唤醒新对象。"
+fi
 
 echo "[$(date)] [Watcher] 任务完成，幽灵退场。"
 rm "$OPENCLAW_BACKUP" || true

@@ -42,8 +42,8 @@ hr-agent/
 │       └── job-profiles.json     # 8 default role configurations
 ├── scripts/
 │   ├── install-hr-agent.sh       # One-click installation script
-│   └── hr-provision-watcher.sh   # Background Daemon for safe system restarts
-└── README.md
+│   └── hr-gateway-watcher.sh     # Background Daemon for safe system restarts
+└── README_EN.md
 ```
 
 ## 🚀 Getting Started
