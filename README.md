@@ -43,7 +43,8 @@ hr-agent/
 ├── scripts/
 │   ├── install-hr-agent.sh       # 安装引导脚本：建立 HR
 │   ├── hr-gateway-watcher.sh     # 守护神守护脚本：后台安全重启与大模型抢救
-│   └── hr-bind-feishu.sh         # 安全绑定渠道路由辅助工具
+│   ├── hr-bind-feishu.sh         # 飞书安全绑定渠道路由辅助工具
+│   └── hr-bind-telegram.sh       # Telegram 安全绑定渠道路由辅助工具
 └── README_EN.md
 ```
 

@@ -68,10 +68,11 @@ openclaw config set "agents.list[<INDEX>].tools.deny" \
 - `{{SAFETY_RULES}}` → 安全红线
 - `{{KNOWLEDGE_FOCUS}}` → 知识领域
 
-### 步骤 5：飞书通道绑定与体验设置（如适用）
+### 步骤 5：通道绑定与体验设置（如适用）
 
-如果用户指定了飞书渠道，你必须在这里调用专用的安全绑定脚本。请使用你在招募阶段**自主决策**的底层调优参数（有问必答 vs 全局监控）。
+如果用户指定了飞书或 Telegram 渠道，你必须在这里调用对应的安全绑定脚本。请使用你在招募阶段**自主决策**的底层调优参数（有问必答 vs 全局监控）。
 
+#### 飞书渠道
 ```bash
 # 例子：有问必答（需要@，流式输出）
 $HOME/.openclaw/workspace-hr/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
@@ -80,7 +81,16 @@ $HOME/.openclaw/workspace-hr/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --re
 $HOME/.openclaw/workspace-hr/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention false --reply-to all
 ```
 
-千万不要尝试用 `jq` 手动修改 `bindings`！
+#### Telegram 渠道
+```bash
+# 例子：有问必答（需要@）
+$HOME/.openclaw/workspace-hr/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
+
+# 例子：全局监控（免@，引用回复）
+$HOME/.openclaw/workspace-hr/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> --require-mention false --reply-to all
+```
+
+千万不要尝试用 `jq` 手动修改 `bindings` 数组，这极其容易引发崩溃！
 
 ### 步骤 6：验证配置
 

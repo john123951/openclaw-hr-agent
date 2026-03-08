@@ -73,17 +73,26 @@ curl -s -X PUT \
 - 如果读不到飞书凭据，跳过改群名，告诉用户需要手动修改
 - 修改群名需要 bot 在群内且有 `im:chat.members:bot_access` 权限
 
-## Telegram 绑定
+## Telegram 绑定（完整流程）
+
+Telegram 由于是公开渠道，**安全白名单**与**体验控制**极其重要。
+千万不要尝试直接修改 `bindings` 数组。请一律使用内置的 Telegram 绑定强化工具：
 
 ```bash
-openclaw agents bind --agent <agentId> --bind telegram:default
+# 基本绑定：只绑定到基础 Telegram 渠道（开启私聊）
+$HOME/.openclaw/workspace-hr/scripts/hr-bind-telegram.sh <agentId>
+
+# 高级绑定：路由到特定的 Telegram 群组（如 -1001234567890），并由你自动附带体验配置
+# 参数解释：
+# --require-mention <true/false>: true表示必须@，false表示免@监控
+# --reply-to <all/off>: all表示开启引用原消息，off表示关闭
+
+$HOME/.openclaw/workspace-hr/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> \
+  --require-mention <true|false> \
+  --reply-to <all|off>
 ```
 
-如果需要绑定到特定 Telegram 账号：
-
-```bash
-openclaw agents bind --agent <agentId> --bind "telegram:<accountId>"
-```
+无论哪种绑定，脚本都将自动为当前 Agent 开启**拟真表情反应互动** `reactionLevel=minimal`，让他活得更像个人。对于群组绑定，脚本也会自动将该群组列入 Telegram 频道的**强制安全白名单**中，防止乱入其他野群。
 
 ## Discord 绑定
 
