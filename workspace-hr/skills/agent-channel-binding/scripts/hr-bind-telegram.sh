@@ -60,8 +60,9 @@ echo "[Telegram Binding Helper] 🔄 已开启 Agent 拟真表情反馈 (reactio
 if [ -n "$GROUP_ID" ]; then
     # ── 路径 A：指定群组 ──────────────────────────────────────────────────────
     # 只创建 peer-specific 群组绑定，不创建通配的 accountId:default 绑定
-    # 以防止出现两条 binding entry 的 bug
+    # 以防止出现两条 binding entry 的 bug。如果 default binding 存在，主动清除它。
     echo "[Telegram Binding Helper] 处理目标群组: $GROUP_ID"
+    openclaw agents unbind --agent "$AGENT_ID" --bind "telegram:default" >/dev/null 2>&1 || true
 
     # 检查是否已有任何 Agent 绑定了该群组
     CONFLICT_AGENT=$(openclaw config get bindings --json | jq -r --arg gid "$GROUP_ID" '

@@ -56,8 +56,9 @@ echo "[Binding Helper] 开始为 Agent '$AGENT_ID' 绑定飞书渠道..."
 if [ -n "$GROUP_ID" ]; then
     # ── 路径 A：指定群组 ──────────────────────────────────────────────────────
     # 只创建 peer-specific 群组绑定，不创建通配的 accountId:default 绑定
-    # 以防止出现两条 binding entry 的 bug
+    # 以防止出现两条 binding entry 的 bug。如果 default binding 存在，主动清除它。
     echo "[Binding Helper] 正在绑定至特定飞书群: $GROUP_ID"
+    openclaw agents unbind --agent "$AGENT_ID" --bind "feishu:default" >/dev/null 2>&1 || true
 
     # 检查是否已有任何 Agent 绑定了该群组
     CONFLICT_AGENT=$(openclaw config get bindings --json | jq -r --arg gid "$GROUP_ID" '
@@ -99,6 +100,29 @@ if [ -n "$GROUP_ID" ]; then
         fi
         echo "[Binding Helper] 🔄 设置群聊消息引用模式: $REPLY_MODE"
         openclaw config set "channels.feishu.groups.$GROUP_ID.replyToMode" "\"$REPLY_MODE\"" --strict-json > /dev/null 2>&1 || true
+    fi
+
+    # ── 自动修改飞书群名 ────────────────────────────────────────────────────────
+    AGENT_NAME=$(openclaw config get agents.list --json 2>/dev/null | jq -r ".[] | select(.id==\"$AGENT_ID\") | .name" || echo "$AGENT_ID")
+    APP_ID=$(openclaw config get channels.feishu.appId 2>/dev/null | tail -n 1 | tr -d '"')
+    APP_SECRET=$(openclaw config get channels.feishu.appSecret 2>/dev/null | tail -n 1 | tr -d '"')
+    
+    if [ -n "$APP_ID" ] && [ "$APP_ID" != "null" ] && [ -n "$APP_SECRET" ] && [ "$APP_SECRET" != "null" ]; then
+        TOKEN=$(curl -s -X POST \
+          "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal" \
+          -H "Content-Type: application/json" \
+          -d "{\"app_id\":\"$APP_ID\",\"app_secret\":\"$APP_SECRET\"}" \
+          | python3 -c "import json,sys; print(json.load(sys.stdin).get('tenant_access_token',''))" 2>/dev/null || echo "")
+        
+        if [ -n "$TOKEN" ]; then
+            echo "[Binding Helper] 🔄 正在调用 Feishu API 修改群 ($GROUP_ID) 名称为: $AGENT_NAME"
+            curl -s -X PUT \
+              "https://open.feishu.cn/open-apis/im/v1/chats/$GROUP_ID" \
+              -H "Authorization: Bearer $TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\":\"$AGENT_NAME\"}" > /dev/null 2>&1 || true
+            echo "[Binding Helper] ✅ 群改名尝试完成。"
+        fi
     fi
 fi
 
