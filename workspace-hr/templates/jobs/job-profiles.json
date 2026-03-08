@@ -1,5 +1,6 @@
 {
   "_description": "HR Agent 岗位模板库 — 预设岗位的推荐配置",
+  "_baseline_note": "⚠️ 基线权限：sessions_list, sessions_send, sessions_history, memory_search, memory_get, message 是所有岗位的生命线，必须始终包含在 allow 中。",
   "profiles": {
     "weather-assistant": {
       "name": "🌤️ 天气助手",
@@ -18,14 +19,19 @@
           "read",
           "cron",
           "sessions_list",
-          "sessions_send"
+          "sessions_send",
+          "sessions_history",
+          "memory_search",
+          "memory_get",
+          "message"
         ],
         "deny": [
           "write",
           "edit",
           "browser",
           "canvas",
-          "nodes"
+          "nodes",
+          "sessions_spawn"
         ]
       },
       "knowledgeFocus": "气象与天气预报",
@@ -53,13 +59,18 @@
           "cron",
           "browser",
           "sessions_list",
-          "sessions_send"
+          "sessions_send",
+          "sessions_history",
+          "memory_search",
+          "memory_get",
+          "message"
         ],
         "deny": [
           "write",
           "edit",
           "canvas",
-          "nodes"
+          "nodes",
+          "sessions_spawn"
         ]
       },
       "knowledgeFocus": "股票市场与技术分析",
@@ -85,12 +96,17 @@
           "write",
           "browser",
           "sessions_list",
-          "sessions_send"
+          "sessions_send",
+          "sessions_history",
+          "memory_search",
+          "memory_get",
+          "message"
         ],
         "deny": [
           "edit",
           "canvas",
-          "nodes"
+          "nodes",
+          "sessions_spawn"
         ]
       },
       "knowledgeFocus": "文案写作与内容营销",
@@ -118,7 +134,11 @@
           "edit",
           "browser",
           "sessions_list",
-          "sessions_send"
+          "sessions_send",
+          "sessions_history",
+          "memory_search",
+          "memory_get",
+          "message"
         ],
         "deny": [
           "canvas",
@@ -148,13 +168,18 @@
           "browser",
           "cron",
           "sessions_list",
-          "sessions_send"
+          "sessions_send",
+          "sessions_history",
+          "memory_search",
+          "memory_get",
+          "message"
         ],
         "deny": [
           "write",
           "edit",
           "canvas",
-          "nodes"
+          "nodes",
+          "sessions_spawn"
         ]
       },
       "knowledgeFocus": "用户运营与增长策略",
@@ -180,12 +205,17 @@
           "write",
           "browser",
           "sessions_list",
-          "sessions_send"
+          "sessions_send",
+          "sessions_history",
+          "memory_search",
+          "memory_get",
+          "message"
         ],
         "deny": [
           "edit",
           "canvas",
-          "nodes"
+          "nodes",
+          "sessions_spawn"
         ]
       },
       "knowledgeFocus": "调研方法论与信息分析",
@@ -211,12 +241,17 @@
           "write",
           "browser",
           "sessions_list",
-          "sessions_send"
+          "sessions_send",
+          "sessions_history",
+          "memory_search",
+          "memory_get",
+          "message"
         ],
         "deny": [
           "edit",
           "canvas",
-          "nodes"
+          "nodes",
+          "sessions_spawn"
         ]
       },
       "knowledgeFocus": "产品管理与用户体验",
@@ -243,7 +278,11 @@
           "browser",
           "sessions_list",
           "sessions_send",
-          "sessions_spawn"
+          "sessions_history",
+          "sessions_spawn",
+          "memory_search",
+          "memory_get",
+          "message"
         ],
         "deny": [
           "canvas",

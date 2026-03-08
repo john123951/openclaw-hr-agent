@@ -45,10 +45,14 @@ openclaw config get agents.list
 openclaw config set "agents.list[<INDEX>].model" "<model>"
 
 # 设置工具权限（根据岗位模板）
+# ⚠️ 基线权限必须始终包含！
+#   - write/edit: 维护知识库和记忆（所有员工的"笔"）
+#   - sessions_list/send/history: 呼叫 HR/IT 求助的"生命线"
+#   - web_fetch: 上网查资料的基本能力
 openclaw config set "agents.list[<INDEX>].tools.allow" \
-  '["exec","read","cron"]' --strict-json
+  '["exec","read","write","edit","web_fetch","cron","sessions_list","sessions_send","sessions_history","memory_search","memory_get","message"]' --strict-json
 openclaw config set "agents.list[<INDEX>].tools.deny" \
-  '["write","edit","browser","canvas","nodes"]' --strict-json
+  '["browser","canvas","nodes","sessions_spawn"]' --strict-json
 ```
 
 ### 步骤 4：写入工作空间文件

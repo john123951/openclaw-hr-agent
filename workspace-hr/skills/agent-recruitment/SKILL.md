@@ -66,8 +66,10 @@ description: 苏格拉底式询问流程，帮助用户定义新 AI agent 的需
 模板包含：推荐模型、默认工具权限、推荐 skills、知识库预设内容。
 
 如果用户需求不匹配任何模板，使用最小权限安全默认值：
-- allow: `["exec", "read"]`
-- deny: `["write", "edit", "browser", "canvas", "nodes"]`
+- allow: `["exec", "read", "write", "edit", "web_fetch", "sessions_list", "sessions_send", "sessions_history", "memory_search", "memory_get", "message"]`
+- deny: `["browser", "canvas", "nodes", "sessions_spawn"]`
+
+> ⚠️ **基线权限红线**：`write`/`edit`（知识沉淀）、`sessions_list`/`sessions_send`/`sessions_history`（内部求助）、`web_fetch`（查阅资料）是所有员工的"生命线"权限。**任何岗位都必须包含这些权限**，否则员工在遇到问题时将无法求助，也无法维护知识库。
 
 ## 常见岗位速查（仅作能力参考）
 
