@@ -19,7 +19,7 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # CURL 管道执行支持：动态拉取源码
 if [ ! -d "$PROJECT_DIR/workspace-hr" ] || [ ! -d "$PROJECT_DIR/global-skills" ]; then
     echo -e "${YELLOW}ℹ️ 正在从 GitHub 下载最新版本...${NC}"
-    TMP_DIR=$(mktemp -d /tmp/openclaw-hr-agent)
+    TMP_DIR=$(mktemp -d /tmp/openclaw-hr-agent.XXXXXX)
     git clone --quiet https://github.com/john123951/openclaw-hr-agent.git "$TMP_DIR"
     PROJECT_DIR="$TMP_DIR"
     trap 'rm -rf "$TMP_DIR"' EXIT
