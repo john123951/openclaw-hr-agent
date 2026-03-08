@@ -2,7 +2,7 @@
 set -e
 
 # ==============================================================================
-# OpenClaw Base-Ops (后勤基座守护进程) 统一卸载向导
+# OpenClaw HR Agent 统一卸载向导
 # 安全移除 HR、IT 专员及相关底层脚本
 # ==============================================================================
 
@@ -27,7 +27,7 @@ cat << "EOF"
 | |  | |_ __   ___ _ __  | |   | |/ _` \ \ /\ / /
 | |__| | '_ \ / _ \ '_ \ | |___| | (_| |\ V  V / 
  \____/| .__/ \___/_| |_| \____|_|\__,_| \_/\_/  
-       | |        Base-Ops Department
+       | |        HR Department
        |_|        
 EOF
 echo -e "${CYAN}欢迎使用 OpenClaw 企业自动化后勤基座卸载向导${NC}\n"
@@ -119,27 +119,17 @@ remove_it_agent() {
 # ==============================================================================
 
 echo -e "⚠️ ${RED}注意：此操作不可逆，将删除基座数据及业务记录。${NC}"
-echo -e "请选择希望卸载的模块 (直接回车默认全选 = 1/2/3):"
-echo -e "  [1] 全局能力包与守护脚本"
-echo -e "  [2] HR 后勤节点与档案室"
-echo -e "  [3] IT 后勤节点与档案室"
-echo -n -e "您的选择 (例如: 1 2 3 或 2 3): "
-read -r sel
-if [ -z "$sel" ]; then
-    sel="1 2 3"
-fi
-
-echo -n -e "\n${RED}最后确认：您即将执行不可逆的销毁动作。是否继续？[Y/n]${NC} "
-read -r confirm
+echo -n -e "${RED}最后确认：您即将卸载 HR、IT 及其相关的全套守护环境。此操作不可逆，是否继续？[Y/n]${NC} "
+read -r confirm < /dev/tty
 if [[ ! -z "$confirm" && ! "$confirm" =~ ^[Yy]$ ]]; then
     echo -e "\n${CYAN}已取消卸载。${NC}"
     exit 0
 fi
 
 echo ""
-if [[ "$sel" == *"1"* ]]; then remove_global_skills; fi
-if [[ "$sel" == *"2"* ]]; then remove_hr_agent; fi
-if [[ "$sel" == *"3"* ]]; then remove_it_agent; fi
+remove_global_skills
+remove_hr_agent
+remove_it_agent
 
 echo -e "\n${GREEN}====================================================${NC}"
 echo -e "${GREEN}🧹 OpenClaw 后勤基座卸载流程全部执行完毕。${NC}"

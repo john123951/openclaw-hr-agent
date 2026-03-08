@@ -2,7 +2,7 @@
 set -e
 
 # ==============================================================================
-# OpenClaw Base-Ops (后勤基座守护进程) 统一安装向导
+# OpenClaw HR Agent 统一安装向导
 # 让您的主服务器一键武装 HR总监 与 IT大牛 双子星后勤兵团
 # ==============================================================================
 
@@ -41,7 +41,7 @@ cat << "EOF"
 | |  | |_ __   ___ _ __  | |   | |/ _` \ \ /\ / /
 | |__| | '_ \ / _ \ '_ \ | |___| | (_| |\ V  V / 
  \____/| .__/ \___/_| |_| \____|_|\__,_| \_/\_/  
-       | |        Base-Ops Department
+       | |        HR Department
        |_|        
 EOF
 echo -e "${CYAN}欢迎使用 OpenClaw 企业自动化后勤基座安装向导${NC}\n"
@@ -107,7 +107,7 @@ deploy_hr_agent() {
 
     if [ "$skip_init" == "false" ]; then
         echo "  正在注册 openclaw agent实体..."
-        openclaw agents add hr
+        openclaw agents add hr --non-interactive --workspace "$HOME/.openclaw/workspace-hr"
         openclaw agents set-identity --agent hr --name "HR 大管家" --emoji "👩‍💼"
         
         # 获取索引并设置工具锁
@@ -148,7 +148,7 @@ deploy_it_agent() {
 
     if [ "$skip_init" == "false" ]; then
         echo "  正在注册 openclaw agent实体..."
-        openclaw agents add it-support
+        openclaw agents add it-support --non-interactive --workspace "$HOME/.openclaw/workspace-it"
         openclaw agents set-identity --agent it-support --name "IT 极客大牛" --emoji "💻"
         
         AGENT_INDEX=$(openclaw config get agents.list | jq '[.[].id] | index("it-support")')
@@ -183,20 +183,11 @@ deploy_it_agent() {
 # 启动选项导航
 # ==============================================================================
 
-echo -e "请选择安装模块 (直接回车默认全选 = 1/2/3):"
-echo -e "  [1] 全局能力包 (推荐，赋能所有终端员工的高阶兵器库)"
-echo -e "  [2] HR 后勤节点 (人力招募/业务监控守护程序)"
-echo -e "  [3] IT 后勤节点 (技术支援/全局脚本热开发引擎)"
-echo -n -e "您的选择 (例如: 1 2 3 或 2 3): "
-read -r sel < /dev/tty
-if [ -z "$sel" ]; then
-    sel="1 2 3"
-fi
+echo -e "${YELLOW}即将开始全环境自动部署：全局能力包、HR 节点及 IT 节点...${NC}\n"
 
-echo ""
-if [[ "$sel" == *"1"* ]]; then deploy_global_skills; fi
-if [[ "$sel" == *"2"* ]]; then deploy_hr_agent; fi
-if [[ "$sel" == *"3"* ]]; then deploy_it_agent; fi
+deploy_global_skills
+deploy_hr_agent
+deploy_it_agent
 
 echo -e "\n${GREEN}====================================================${NC}"
 echo -e "${GREEN}🎉 恭喜！OpenClaw 后勤基座部署流程全部执行完毕。${NC}"

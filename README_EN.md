@@ -1,17 +1,14 @@
-# 🧑‍💼 OpenClaw HR Agent
+# 🧑‍💼 OpenClaw Automated HR Director
 
 [English](README_EN.md) | [中文](README.md)
 
-**Still manually editing JSON configs and writing lengthy prompts just to initialize a new AI Agent? Let your HR handle it!**
+**Stop hand-writing JSON configs and endless Prompts. Your AI infrastructure needs a professional HR.**
 
-**OpenClaw HR Agent** is a fully automated recruitment manager built for the [OpenClaw](https://github.com/openclaw/openclaw) multi-agent framework. 
-It targets the core pain point of agent management setup: just tell the HR in plain English, "I need a programmer" or "Hire me a stock monitor", and it will automatically capture your underlying requirements through a concise Socratic dialogue. Then, it autonomously handles identity creation, model allocation, tool permission routing, multi-channel binding (Feishu/Telegram/Discord), and knowledge-base initialization.
-
-Furthermore, it arrives with a built-in Base-Ops infrastructure: an auto-healing watcher daemon and a dedicated IT support agent capable of hot-writing code tools for your new hires, completely liberating you from low-level system configuration.
+Just say "Hire me a stock monitor," and the Agent uses **Socratic dialogue** to capture your needs. It **autonomously handles** identity creation, optimal model allocation, tool provisioning, and cross-channel binding (Feishu/TG/Discord). It even ships with an LLM-powered self-healing watcher, letting you focus purely on business logic.
 
 ## 🚀 Quick Install
 
-Run the following command in your terminal for a fully automated, one-click installation of OpenClaw Base-Ops:
+Run the following command in your terminal for a fully automated, one-click installation of OpenClaw HR Agent:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/john123951/openclaw-hr-agent/refs/heads/main/install.sh | bash

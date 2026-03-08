@@ -1,17 +1,14 @@
-# 🧑‍💼 OpenClaw HR Agent
+# 🧑‍💼 OpenClaw 自动化人事总监 (HR Agent)
 
 [中文](README.md) | [English](README_EN.md)
 
-**还在为了新建一个 AI Agent 去苦哈哈地手写 JSON 配置和写长篇 Prompt 吗？把这件事交给专门的 HR 吧！**
+**你的大模型🦞龙虾团队，需要一位专业的 HR。**
 
-**OpenClaw HR Agent** 是一款专为 [OpenClaw](https://github.com/openclaw/openclaw) 框架打造的**全自动 AI 员工招募管家**。
-它直击用户的核心痛点：你只需用自然语言对它说“我需要一个程序员”或“帮我招一个股票盯盘助手”，它就会通过苏格拉底式的对话摸清你的需求，并在底层**全自动完成**身份创立、模型分配、工具赋权、通信渠道绑定（飞书/TG/Discord）以及专属脑库的初始化。
-
-此外，它还自带了一套强大的后勤系统（Base-Ops），当新进的 AI 员工缺少特定代码工具时，自带的 IT 支援节点甚至能当场手搓代码热更新给你，让你彻底告别繁琐的底层系统干预。
+只需用自然语言对它说“帮我招一个股票盯盘助手”，它便会通过**苏格拉底式对话**精准捕捉需求，并**全自动完成**底层身份创立、模型择优、工具赋权、甚至通过 API 自动建飞书群绑定。自带底层大模型抢救机制，让你专注核心业务逻辑。
 
 ## 🚀 一键安装
 
-只需在终端中运行以下命令，即可全自动安装并配置 OpenClaw Base-Ops：
+只需在终端中运行以下命令，即可全自动安装并配置 OpenClaw HR Agent：
 
 ```bash
 curl -sL https://raw.githubusercontent.com/john123951/openclaw-hr-agent/refs/heads/main/install.sh | bash
