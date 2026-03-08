@@ -31,14 +31,14 @@ metadata: {"openclaw": {"requires": {"bins": ["openclaw", "curl"]}}}
 
 ```bash
 # 基本绑定：只绑定到基础飞书渠道（不指定群组）
-$HOME/.openclaw/workspace-hr/scripts/hr-bind-feishu.sh <agentId>
+$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-feishu.sh <agentId>
 
 # 高级绑定：路由到特定飞书群（如 oc_12345），并附跟你自动决策的体验配置
 # 参数解释：
 # --require-mention <true/false>: true表示必须@，false表示免@监控
 # --reply-to <all/off>: all表示开启引用原消息，off表示关闭（注意：开启all会自动禁用系统卡片流式输出）
 
-$HOME/.openclaw/workspace-hr/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> \
+$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> \
   --require-mention <true|false> \
   --reply-to <all|off>
 ```
@@ -80,14 +80,14 @@ Telegram 由于是公开渠道，**安全白名单**与**体验控制**极其重
 
 ```bash
 # 基本绑定：只绑定到基础 Telegram 渠道（开启私聊）
-$HOME/.openclaw/workspace-hr/scripts/hr-bind-telegram.sh <agentId>
+$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegram.sh <agentId>
 
 # 高级绑定：路由到特定的 Telegram 群组（如 -1001234567890），并由你自动附带体验配置
 # 参数解释：
 # --require-mention <true/false>: true表示必须@，false表示免@监控
 # --reply-to <all/off>: all表示开启引用原消息，off表示关闭
 
-$HOME/.openclaw/workspace-hr/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> \
+$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> \
   --require-mention <true|false> \
   --reply-to <all|off>
 ```

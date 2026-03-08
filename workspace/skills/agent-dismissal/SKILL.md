@@ -51,7 +51,10 @@ fi
 echo "正在注销门禁卡和系统权限..."
 openclaw agents delete --force "$AGENT_ID"
 
-# 3. 异步安全重启系统生效 (由 Watcher 守护)
+# 3. 移除关联的定时系统任务 (Cron Jobs)
+$HOME/.openclaw/workspace-hr/skills/agent-dismissal/scripts/cleanup-cron.sh "$AGENT_ID"
+
+# 4. 异步安全重启系统生效 (由 Watcher 守护)
 nohup $HOME/.openclaw/workspace-hr/scripts/hr-gateway-watcher.sh "$AGENT_ID" dismiss > /tmp/hr-watcher.log 2>&1 &
 ```
 

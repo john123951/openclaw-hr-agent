@@ -75,19 +75,19 @@ openclaw config set "agents.list[<INDEX>].tools.deny" \
 #### 飞书渠道
 ```bash
 # 例子：有问必答（需要@，流式输出）
-$HOME/.openclaw/workspace-hr/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
+$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
 
 # 例子：全局监控（免@，引用回复）
-$HOME/.openclaw/workspace-hr/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention false --reply-to all
+$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention false --reply-to all
 ```
 
 #### Telegram 渠道
 ```bash
 # 例子：有问必答（需要@）
-$HOME/.openclaw/workspace-hr/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
+$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
 
 # 例子：全局监控（免@，引用回复）
-$HOME/.openclaw/workspace-hr/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> --require-mention false --reply-to all
+$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> --require-mention false --reply-to all
 ```
 
 千万不要尝试用 `jq` 手动修改 `bindings` 数组，这极其容易引发崩溃！
