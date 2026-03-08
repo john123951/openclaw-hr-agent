@@ -79,15 +79,30 @@ echo "$AGENTS_LIST" | jq -r '.[] | .id' | while read -r agent_id; do
     DENY=$(echo "$AGENTS_LIST" | jq -r --arg id "$agent_id" '.[] | select(.id == $id) | .tools.deny // [] | join(", ")')
 
     # 检查基线权限是否完整
+    HAS_WRITE=$(echo "$AGENTS_LIST" | jq --arg id "$agent_id" '.[] | select(.id == $id) | .tools.allow // [] | any(. == "write")')
+    HAS_EDIT=$(echo "$AGENTS_LIST" | jq --arg id "$agent_id" '.[] | select(.id == $id) | .tools.allow // [] | any(. == "edit")')
+    HAS_WEB_FETCH=$(echo "$AGENTS_LIST" | jq --arg id "$agent_id" '.[] | select(.id == $id) | .tools.allow // [] | any(. == "web_fetch")')
     HAS_SESSIONS_LIST=$(echo "$AGENTS_LIST" | jq --arg id "$agent_id" '.[] | select(.id == $id) | .tools.allow // [] | any(. == "sessions_list")')
     HAS_SESSIONS_SEND=$(echo "$AGENTS_LIST" | jq --arg id "$agent_id" '.[] | select(.id == $id) | .tools.allow // [] | any(. == "sessions_send")')
     HAS_SESSIONS_HISTORY=$(echo "$AGENTS_LIST" | jq --arg id "$agent_id" '.[] | select(.id == $id) | .tools.allow // [] | any(. == "sessions_history")')
 
     BASELINE_OK="✅"
     BASELINE_MISSING=""
+    if [ "$HAS_WRITE" != "true" ]; then
+        BASELINE_OK="❌"
+        BASELINE_MISSING="write "
+    fi
+    if [ "$HAS_EDIT" != "true" ]; then
+        BASELINE_OK="❌"
+        BASELINE_MISSING="${BASELINE_MISSING}edit "
+    fi
+    if [ "$HAS_WEB_FETCH" != "true" ]; then
+        BASELINE_OK="❌"
+        BASELINE_MISSING="${BASELINE_MISSING}web_fetch "
+    fi
     if [ "$HAS_SESSIONS_LIST" != "true" ]; then
         BASELINE_OK="❌"
-        BASELINE_MISSING="sessions_list "
+        BASELINE_MISSING="${BASELINE_MISSING}sessions_list "
     fi
     if [ "$HAS_SESSIONS_SEND" != "true" ]; then
         BASELINE_OK="❌"

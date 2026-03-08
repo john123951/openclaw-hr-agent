@@ -35,7 +35,7 @@ $HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-feishu
 
 # 高级绑定：路由到特定飞书群（如 oc_12345），并附跟你自动决策的体验配置
 # 参数解释：
-# --require-mention <true/false>: true表示必须@，false表示免@监控
+# --require-mention <true/false>: true表示:必须@机器人，false表示:无需@机器人
 # --reply-to <all/off>: all表示开启引用原消息，off表示关闭（注意：开启all会自动禁用系统卡片流式输出）
 
 $HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> \
@@ -84,7 +84,7 @@ $HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegr
 
 # 高级绑定：路由到特定的 Telegram 群组（如 -1001234567890），并由你自动附带体验配置
 # 参数解释：
-# --require-mention <true/false>: true表示必须@，false表示免@监控
+# --require-mention <true/false>: true表示:必须@机器人，false表示:无需@机器人
 # --reply-to <all/off>: all表示开启引用原消息，off表示关闭
 
 $HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> \

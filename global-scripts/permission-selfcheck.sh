@@ -89,6 +89,15 @@ check_tool "canvas" "画布"
 check_tool "nodes" "节点"
 
 echo ""
+echo "🔍 检查基线权限完整性..."
+baselines=("write" "edit" "web_fetch" "sessions_list" "sessions_send" "sessions_history" "memory_search" "memory_get" "message")
+for base in "${baselines[@]}"; do
+    if ! echo "$ALLOW" | jq -e --arg t "$base" 'any(. == $t)' >/dev/null; then
+        echo "   ❌ 缺失基线权限: $base"
+        ISSUES+=("缺失基线权限: $base")
+        SUGGESTIONS+=("向 HR 申请基线权限: $base")
+    fi
+done
 
 # 工作空间写入测试
 if [ -n "$WORKSPACE" ] && [ -d "$WORKSPACE" ]; then

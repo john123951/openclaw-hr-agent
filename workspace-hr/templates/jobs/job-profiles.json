@@ -1,6 +1,6 @@
 {
   "_description": "HR Agent 岗位模板库 — 预设岗位的推荐配置",
-  "_baseline_note": "⚠️ 基线权限：sessions_list, sessions_send, sessions_history, memory_search, memory_get, message 是所有岗位的生命线，必须始终包含在 allow 中。",
+  "_baseline_note": "⚠️ 基线权限：write, edit, web_fetch, sessions_list, sessions_send, sessions_history, memory_search, memory_get, message 是所有岗位的生命线，必须始终包含在 allow 中。",
   "profiles": {
     "weather-assistant": {
       "name": "🌤️ 天气助手",
@@ -17,6 +17,9 @@
         "allow": [
           "exec",
           "read",
+          "write",
+          "edit",
+          "web_fetch",
           "cron",
           "sessions_list",
           "sessions_send",
@@ -26,8 +29,6 @@
           "message"
         ],
         "deny": [
-          "write",
-          "edit",
           "browser",
           "canvas",
           "nodes",
@@ -56,6 +57,9 @@
         "allow": [
           "exec",
           "read",
+          "write",
+          "edit",
+          "web_fetch",
           "cron",
           "browser",
           "sessions_list",
@@ -66,8 +70,6 @@
           "message"
         ],
         "deny": [
-          "write",
-          "edit",
           "canvas",
           "nodes",
           "sessions_spawn"
@@ -94,6 +96,8 @@
           "exec",
           "read",
           "write",
+          "edit",
+          "web_fetch",
           "browser",
           "sessions_list",
           "sessions_send",
@@ -103,7 +107,6 @@
           "message"
         ],
         "deny": [
-          "edit",
           "canvas",
           "nodes",
           "sessions_spawn"
@@ -132,6 +135,8 @@
           "read",
           "write",
           "edit",
+          "apply_patch",
+          "web_fetch",
           "browser",
           "sessions_list",
           "sessions_send",
@@ -165,6 +170,9 @@
         "allow": [
           "exec",
           "read",
+          "write",
+          "edit",
+          "web_fetch",
           "browser",
           "cron",
           "sessions_list",
@@ -175,8 +183,6 @@
           "message"
         ],
         "deny": [
-          "write",
-          "edit",
           "canvas",
           "nodes",
           "sessions_spawn"
@@ -203,6 +209,8 @@
           "exec",
           "read",
           "write",
+          "edit",
+          "web_fetch",
           "browser",
           "sessions_list",
           "sessions_send",
@@ -212,7 +220,6 @@
           "message"
         ],
         "deny": [
-          "edit",
           "canvas",
           "nodes",
           "sessions_spawn"
@@ -239,6 +246,8 @@
           "exec",
           "read",
           "write",
+          "edit",
+          "web_fetch",
           "browser",
           "sessions_list",
           "sessions_send",
@@ -248,7 +257,6 @@
           "message"
         ],
         "deny": [
-          "edit",
           "canvas",
           "nodes",
           "sessions_spawn"
@@ -275,6 +283,8 @@
           "exec",
           "read",
           "write",
+          "edit",
+          "web_fetch",
           "browser",
           "sessions_list",
           "sessions_send",
