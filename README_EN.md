@@ -42,7 +42,8 @@ hr-agent/
 │       └── job-profiles.json     # 8 default role configurations
 ├── scripts/
 │   ├── install-hr-agent.sh       # One-click installation script
-│   └── hr-gateway-watcher.sh     # Background Daemon for safe system restarts
+│   ├── hr-gateway-watcher.sh     # Background Daemon for safe system restarts
+│   └── hr-bind-feishu.sh         # Helper for safely binding agents to channels
 └── README_EN.md
 ```
 

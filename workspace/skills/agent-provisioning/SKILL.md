@@ -68,13 +68,27 @@ openclaw config set "agents.list[<INDEX>].tools.deny" \
 - `{{SAFETY_RULES}}` → 安全红线
 - `{{KNOWLEDGE_FOCUS}}` → 知识领域
 
-### 步骤 5：验证配置
+### 步骤 5：飞书通道绑定与体验设置（如适用）
+
+如果用户指定了飞书渠道，你必须在这里调用专用的安全绑定脚本。请使用你在招募阶段**自主决策**的底层调优参数（有问必答 vs 全局监控）。
+
+```bash
+# 例子：有问必答（需要@，流式输出）
+$HOME/.openclaw/workspace-hr/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
+
+# 例子：全局监控（免@，引用回复）
+$HOME/.openclaw/workspace-hr/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention false --reply-to all
+```
+
+千万不要尝试用 `jq` 手动修改 `bindings`！
+
+### 步骤 6：验证配置
 
 ```bash
 openclaw config validate
 ```
 
-### 步骤 6：通过 Watcher Daemon 安全重启 Gateway（关键）
+### 步骤 7：通过 Watcher Daemon 安全重启 Gateway（关键）
 
 Gateway 重启后你的进程会被杀掉，用户也收不到确认消息，甚至如果配置错误 Gateway 会崩溃。因此**绝对不能**直接调用 `openclaw gateway restart`。
 
@@ -86,7 +100,7 @@ nohup $HOME/.openclaw/workspace-hr/scripts/hr-gateway-watcher.sh <agentId> provi
 
 执行后，立即回复用户："✅ 新同事 <Agent名称> 的档案已建好！系统正由 Watcher 接管，将在后台进行安全校验与重启... 苏醒后新同事会亲自向您报告！"
 
-### 步骤 7：验证
+### 步骤 8：验证
 
 ```bash
 openclaw agents list --bindings

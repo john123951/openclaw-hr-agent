@@ -23,36 +23,29 @@ metadata: {"openclaw": {"requires": {"bins": ["openclaw", "curl"]}}}
 
 ## 飞书群组绑定（完整流程）
 
-### 1. 添加基础绑定
+### 1. 使用专用绑定脚本（推荐、安全）
+
+**注意：千万不要尝试直接用 `jq` 去手写 `openclaw.json` 中的 `bindings` 数组，这极其容易引发严重的重复项或 JSON 破损崩溃！**
+
+请直接调用预置的安全绑定工具脚本：
 
 ```bash
-openclaw agents bind --agent <agentId> --bind "feishu:main"
+# 基本绑定：只绑定到基础飞书渠道（不指定群组）
+$HOME/.openclaw/workspace-hr/scripts/hr-bind-feishu.sh <agentId>
+
+# 高级绑定：路由到特定飞书群（如 oc_12345），并附跟你自动决策的体验配置
+# 参数解释：
+# --require-mention <true/false>: true表示必须@，false表示免@监控
+# --reply-to <all/off>: all表示开启引用原消息，off表示关闭（注意：开启all会自动禁用系统卡片流式输出）
+
+$HOME/.openclaw/workspace-hr/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> \
+  --require-mention <true|false> \
+  --reply-to <all|off>
 ```
 
-### 2. 添加 peer 级别路由（精确到群组）
+只要脚本执行完毕，飞书路由通道及相关的体验/性能调优便完美建立。
 
-读取现有 bindings 并追加新绑定：
-
-```bash
-# 方法一：使用 openclaw config set 添加绑定项
-# 先查看当前 bindings 数量
-openclaw config get bindings --strict-json
-
-# 追加新 binding（使用下一个索引）
-openclaw config set "bindings[<NEXT_INDEX>]" \
-  '{"agentId":"<agentId>","match":{"channel":"feishu","peer":{"kind":"group","id":"<GROUP_ID>"}}}' \
-  --strict-json
-```
-
-### 3. 配置群组不需要 @mention
-
-```bash
-openclaw config set \
-  "channels.feishu.groups.<GROUP_ID>.requireMention" \
-  false --strict-json
-```
-
-### 4. 修改飞书群名（调用飞书 API）
+### 2. 修改飞书群名（调用飞书 API）
 
 **前提**：需要从配置中读取飞书 App ID 和 App Secret。
 

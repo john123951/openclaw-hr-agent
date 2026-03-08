@@ -38,8 +38,9 @@ GATEWAY_ALIVE=false
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     echo "[$(date)] [Watcher] 正在尝试启动/重启 Gateway (尝试次数: $((RETRY_COUNT+1)))"
     
-    # 尝试启动或重启 Gateway 并捕获输出（不要阻塞）
-    openclaw gateway restart > /tmp/gateway_restart_out.log 2>&1 || true
+    # 尝试启动或重启 Gateway 并捕获输出（优先使用 install + start，如果已存在则 fallback 给 restart）
+    echo "[$(date)] [Watcher] 执行 Gateway 唤醒指令..."
+    (openclaw gateway install && openclaw gateway start || openclaw gateway restart) > /tmp/gateway_restart_out.log 2>&1 || true
     
     # 等待系统初始化
     sleep 8
