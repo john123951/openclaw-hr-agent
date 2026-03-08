@@ -159,6 +159,17 @@ deploy_it_agent() {
     cp -r "$PROJECT_DIR/workspace-it/"* "$IT_WORKSPACE/"
     
     echo -e "  ${GREEN}✓${NC} IT 黑客台档案部署完毕 ($IT_WORKSPACE)"
+    
+    # 动态挂载外部核心工具 (如 skill-creator)
+    echo -e "  ${BLUE}[+] 正在通过 npx 挂载外部依赖技能 (skill-creator)...${NC}"
+    set +e
+    npx skills add https://github.com/anthropics/skills --skill skill-creator --agent openclaw --global --yes
+    if [ $? -eq 0 ]; then
+        echo -e "  ${GREEN}✓${NC} skill-creator 外部技能安装成功"
+    else
+        echo -e "  ${YELLOW}⚠️ skill-creator 安装异常。请稍后手动执行: npx skills add https://github.com/anthropics/skills --skill skill-creator --agent openclaw --global --yes${NC}"
+    fi
+    set -e
 }
 
 
