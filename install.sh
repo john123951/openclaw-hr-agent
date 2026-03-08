@@ -65,10 +65,10 @@ deploy_global_skills() {
         done
     fi
     
-    if [ -d "$PROJECT_DIR/scripts" ]; then
+    if [ -d "$PROJECT_DIR/global-scripts" ]; then
         echo -e "  ${BLUE}[+] 正在挂载底层守护进程 (Global Scripts)...${NC}"
         mkdir -p "$HOME/.openclaw/scripts"
-        cp "$PROJECT_DIR/scripts/"* "$HOME/.openclaw/scripts/"
+        cp "$PROJECT_DIR/global-scripts/"* "$HOME/.openclaw/scripts/"
         echo -e "  ${GREEN}✓${NC} global-scripts/ (守护程序已全系统部署)"
     fi
 }
@@ -113,10 +113,7 @@ deploy_hr_agent() {
     HR_WORKSPACE=$(echo "$HR_WORKSPACE" | tr -d '"')
     HR_WORKSPACE="${HR_WORKSPACE/#\~/$HOME}"
     
-    mkdir -p "$HR_WORKSPACE"
     cp -r "$PROJECT_DIR/workspace-hr/"* "$HR_WORKSPACE/"
-    # 同步共享模板
-    cp -r "$PROJECT_DIR/shared-templates/" "$HR_WORKSPACE/templates/"
     
     echo -e "  ${GREEN}✓${NC} HR 工作台档案部署完毕 ($HR_WORKSPACE)"
     
