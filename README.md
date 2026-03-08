@@ -4,106 +4,65 @@
 
 **你的大模型🦞龙虾团队，需要一位专业的 HR。**
 
-只需用自然语言对它说“帮我招一个股票盯盘助手”，它便会通过**苏格拉底式对话**精准捕捉需求，并**全自动完成**底层身份创立、模型择优、工具赋权、甚至通过 API 自动建飞书群绑定。自带底层大模型抢救机制，让你专注核心业务逻辑。
+让您的专属 **HR 总监** 与 **IT 极客** 通过自然对话，全自动为您招募 AI 员工、配置系统权限，并一键打通飞书/TG等渠道。
 
-## 🚀 一键安装
+## 🚀 极速一键装载
 
-只需在终端中运行以下命令，即可全自动安装并配置 OpenClaw HR Agent：
+最简单的安装方式，直接对你的 OpenClaw 助手说：
+> "帮我安装这个后勤管家生态：https://github.com/john123951/openclaw-hr-agent"
+
+或者，你也可以在终端中运行以下命令，全自动静默安装全局守护系统并拉起两位后勤管家：
 
 ```bash
 curl -sL https://raw.githubusercontent.com/john123951/openclaw-hr-agent/refs/heads/main/install.sh | bash
 ```
 
+> **卸载指令**：如果想让环境恢复原状，可拉取源码后执行 `./uninstall.sh`，实现“好聚好散”的无残留无损回滚。
+
+---
+
 ## ✨ 核心痛点解决
 
 - **告别手写 JSON 配置** — 全程通过调用底层 CLI 部署新员工，不再需要手动干预易错的物理文件。
 - **苏格拉底式极速招聘** — 抛弃“连环十问”的死板问卷。HR 会主动推断你的盲区需求，最快只需 3 轮对话即可敲定岗位架构。
+- **动态造轮子的 IT 专家** — 假如你的文案 AI 需要一个特殊的爬虫工具，你不再需要自己写代码，直接让它去找 IT 部门（呼叫 `it-support`）。IT 专家会即兴编写 TypeScript 脚本并打包为全局 Skill。
 - **自动打通通信平台** — 一键将新员工自动外派到飞书（Lark）、Telegram、Discord，并支持自动修改飞书群名等 API 联动。
 - **社会化环境向导** — 拒绝新员工“空降”。他们会在入职第一秒自动认识老板、了解公司权责图，并被强制要求向 IT 部门“拜码头”。
-- **附赠 8 种开箱即用的牛马** — 天气助手、股票盯盘、程序员、文案写手、运营专员、研究员、产品经理及 CEO 专属顾问，即开即用。
-- **自带大模型极客抢救机制** — 系统内置了 Watcher 守护进程，如果创建 Agent 导致底层配置文件报错，它会主动唤醒大模型（如 Claude/Gemini）现场修 Bug 并热恢复。
+- **自带大模型极客抢救机制** — 系统内置了 Watcher 守护进程，如果创建 Agent 导致底层配置文件报错，它会主动唤醒大模型（如 Claude/Gemini）进行外科手术式的 JSON 修复。
 
-## 📁 项目结构
+---
+
+## 📁 准确的项目架构
 
 ```
-hr-agent/
-├── workspace/                    # HR Agent 自身的脑区与工作空间
-│   ├── AGENTS.md                 # 工作规则（三段式招聘引导流程）
-│   ├── SOUL.md                   # HR 的人格定义（专业、热情、果断）
-│   ├── IDENTITY.md               # 身份标识与系统展示参数
-│   ├── USER.md                   # 用户画像上下文模板
-│   ├── TOOLS.md                  # CLI 与外部 API 操作备忘录
-│   └── skills/                   # HR 的硬核谋生技能库
-│       ├── agent-recruitment/    # 需求探索与方案生成
-│       ├── agent-provisioning/   # CLI 自动化生成档案与部署
+openclaw-hr-agent/
+├── install.sh                  # 极简一键安装与部署门面
+├── uninstall.sh                # 干净无残留的全局卸载工具
+├── global-scripts/             # 全局底层守护进程
+│   └── gateway-watcher.sh      # 后台安全重启与 JSON 自愈守望者
+├── global-skills/              # 伴随基座安装的全局高阶技能包
+│   └── openclaw-mastery/       # 赋予 AI 对 OpenClaw 系统本体的控制力
+├── workspace-hr/               # HR 总监的专属隔离办公区
+│   ├── AGENTS.md / SOUL.md     # 三段式招聘标准与亲和果断的人格设定
+│   └── skills/                 # HR 的核心行政武器库
+│       ├── agent-recruitment/  # 需求探索与方案生成
+│       ├── agent-provisioning/ # CLI 自动化生成档案与部署
 │       ├── agent-knowledge-setup/# 预装领域知识库
 │       ├── agent-channel-binding/# 通信渠道路由绑定与调优
-│       ├── agent-onboarding/     # 拟定迎新致辞与上岗指导
-│       └── agent-dismissal/      # 离职存档、剥夺权限与清理空间
-├── templates/
-│   ├── new-agent/                # 发给新员工的标准配置模板
-│   │   ├── AGENTS.md.template
-│   │   ├── SOUL.md.template
-│   │   ├── BOOTSTRAP.md.template
-│   │   └── knowledge-init.md.template
-│   └── jobs/
-│       └── job-profiles.json     # 预设的 8 种岗位配置文件
-├── scripts/
-│   ├── install-hr-agent.sh       # 安装引导脚本：建立 HR
-│   └── hr-gateway-watcher.sh     # 守护神守护脚本：后台安全重启与大模型抢救
-└── README_EN.md
+│       └── agent-onboarding/   # 拟定迎新致辞与上岗指导
+├── workspace-it/               # IT 后勤专员的硬核极客区
+│   ├── AGENTS.md / SOUL.md     # 代码防灾指南与极客宅人格设定
+│   └── skills/                 # 属于 IT 的干活流库
+└── shared-templates/           # 公共资源池
+    ├── new-agent/              # 发给新业务员工的标准配置模板包
+    └── jobs/                   # 预设的岗位配置（盯盘/程序员/运营等）
 ```
 
-## 🚀 极速安装
+---
 
-### 前置要求
+## 💬 体验工作流演示
 
-- 最新版本的 [OpenClaw](https://github.com/nichochar/openclaw) 系统已正常运转
-- 全局终端可以呼出 `openclaw` CLI，并配有至少一种可用的大模型
-- Gateway（系统网关）守护进程处于活动状态
-
-### 一键脚本
-
-```bash
-# 获取源码
-git clone <your-repo-url> hr-agent
-cd hr-agent
-
-# 运行初始化安装引导
-./scripts/install-hr-agent.sh
-```
-
-此安装脚本执行时，会自动帮你在本地环境中：
-1. ✅ 检查依赖环境并在 OpenClaw 系统注册名为 `hr` 的新助手
-2. ✅ 将本项目中预设好的身份数据（🧑‍💼 HR Manager）导入
-3. ✅ 根据你本地已有模型环境，智能分配最合理的语言模型给 HR
-4. ✅ 将精妙打包好的工作空间目录（Skills、Templates 甚至 Watcher）同步至 `~/.openclaw/workspace-hr` 并赋权
-5. ✅ 给出一个通道绑定向导，让你决定是在终端、飞书还是 Discord 里和 HR 聊天
-6. ✅ 安全延迟重启网关，无缝热更新
-
-### 手动绑定终端/IM（可选）
-
-如果在安装过程中选择了暂不绑定，你也可以随时通过命令行调遣 HR：
-
-```bash
-# 派去飞书对接
-openclaw agents bind --agent hr --bind feishu:main
-
-# 派去 Telegram
-openclaw agents bind --agent hr --bind telegram:default
-
-# 绑定到 Discord
-openclaw agents bind --agent hr --bind discord:default
-
-# 重启使新通道入口生效
-openclaw gateway restart
-```
-
-## 💬 体验工作流
-
-你可以回到你绑定的通信软件（或终端）直接对 HR 发起聊天：
-
-### 招聘录用演示
+安装完成后，你可以回到你绑定的通信软件（或直接在终端）直接对 HR 发起聊天：
 
 ```
 你：我需要一个人帮我每天看看天气。
@@ -132,59 +91,19 @@ HR：方案已最终确认 ✅
 
 HR：档案创立中... ⏳
     ✅ 新同事的档案已建好！系统正由 Watcher 接管在后台进行安全校验与重启... 苏醒后新同事会亲自向您报告！
-    (片刻后，新员工出现在飞书中发言接管战场)
+
+(片刻后，新员工出现在飞书群里)
+天气助手：🎉 老板好！我是新入职的天气播报员，已经准备好为您盯着上海的天空啦！有任何需要随时叫我。
 ```
 
-### HR 的业务能力一览表
+---
 
-| 专业技能 | 底层逻辑说明 |
-|------|------|
-| 🔍 需求捕捉 | 高级苏格拉底提问策略，能够自行推断大量潜台词，只问核心盲点 |
-| 📋 选型匹配 | 根据预设岗位，自动匹配适合的模型深度（支持动态识别你本地已经配好的可用模型并择优录用） |
-| 🏗️ 系统注册 | 生成标准 shell 命令直接配置物理档案，摒弃了危险也容易产生幻觉的 JSON 原生拼装方案 |
-| 📚 脑库构建 | 为新员工建立独立的本地 Embedding 库和 Workspace 工作夹架构 |
-| 🔗 权限发放 | 把系统层面的飞书、Discord 钩子权限挂载给子 Agent |
-| 📝 迎新指导 | 在新员工启动的第一秒注入欢迎信协议（Bootstrap），让他知道自己是谁和身在何处 |
-| 🚪 员工辞退 | "好聚好散" — 安全清理所有遗留权限，并将桌面数据全部归组打包送入系统的 Trash 回收站存档 |
+## 📖 核心设计准则
 
-## 🔧 高阶自定义
-
-### 新建你独有的岗位模板
-
-如果预设的 8 种员工无法满足，你可以修改 `templates/jobs/job-profiles.json` 以添加新的模型岗位画像：
-
-```json
-{
-  "my-custom-role": {
-    "name": "🎯 自定义岗位",
-    "keywords": ["关键词1", "关键词2"],
-    "role": "岗位职责描述",
-    "modelStrategy": "最强模型",
-    "tools": {
-      "allow": ["exec", "read"],
-      "deny": ["write", "edit"]
-    },
-    "knowledgeFocus": "专业领域指引",
-    "defaultSafetyRules": "不该做的事情列表",
-    "soulBeliefs": "该扮演的核心价值观"
-  }
-}
-```
-
-### 微调 HR 的行事风格
-
-在这个架构下，你才是真正意义上的上帝。只需要编辑项目根目录中的 `workspace/SOUL.md`，你就可以将热心助人的 HR 变成极其冷酷刻薄的系统主管。
-
-### 调校底层自动回滚大模型机制 (Watcher Daemon)
-
-打开 `scripts/hr-gateway-watcher.sh`，内部包含了完整的 `claudecode -> codex -> gemini` 三重降落伞容错机制逻辑。当 OpenClaw 底层配置文件面临威胁时，它可以依靠纯命令行进行全自动原地修复。你可以自由拓展里面关于 AI 抢救时的自定义 prompt。
-
-## 📖 架构与设计准则
-
-1. **“无感是最佳的交互体验”** — 将用户从枯燥配置中彻底解放，三轮问答内必须成军。
-2. **安全左移** — 使用基于 `openclaw` 原生命令行的脚手架构建技术代替 AI 在 JSON 内自行涂鸦，避免配置污染导致的网关崩溃综合症。
-3. **“人类中心主义”架构** — 所有产出的 Agent 必须且只对创建者（人类使用者）本人汇报，即使他们拥有独立的飞书账号。
-4. **自监督容错闭环** — 系统级操作绝不可成为黑盒。任何因创建 Agent 触发的核心系统重启动作，均通过挂载专门的 Linux/Unix Bash 守护进程 (Watcher) 进行多层验证与熔断恢复。
+1. **“无感是最佳的交互体验”** — 将用户从枯燥配置中彻底解放，三轮对话内必须成军。
+2. **“安全左移”的设计论** — 使用基于 `openclaw` 原生命令行的脚手架工具链技术，绝不允许 AI 直接去拼接巨大的 `openclaw.json`，彻底切断语法树损毁危机。
+3. **“人类中心主义”架构** — 所有产出的 Agent 必须且只对创建者（人类使用者）本人汇报，即使他们是 HR 招募进来的。
+4. **自造系统血氧自愈循环** — 系统级操作绝不可成为死机黑盒。任何因创建 Agent 触发的核心系统重启动作，均通过独立编外的 Linux/Unix Bash 进程执行闭环监管。
 
 ## 📄 License
 

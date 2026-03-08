@@ -56,13 +56,19 @@ echo "[Telegram Binding Helper] 🔄 已开启 Agent 拟真表情反馈 (reactio
 if [ -n "$GROUP_ID" ]; then
     echo "[Telegram Binding Helper] 处理目标群组: $GROUP_ID"
     
-    # 检查是否已经添加此 peer 绑定
-    EXISTING_BIND=$(openclaw config get bindings --json | jq -r --arg agent "$AGENT_ID" --arg gid "$GROUP_ID" '
-        .[] | select(.agentId == $agent and .match.channel == "telegram" and .match.peer.id == $gid) | .agentId
-    ')
+    # 检查是否已有任何 Agent 绑定了该群组
+    CONFLICT_AGENT=$(openclaw config get bindings --json | jq -r --arg gid "$GROUP_ID" '
+        .[] | select(.match.channel == "telegram" and .match.peer.id == $gid) | .agentId
+    ' | head -n 1)
     
-    if [ -n "$EXISTING_BIND" ]; then
-        echo "[Telegram Binding Helper] ⚠️ 该群组的绑定路由已存在，跳过追加。"
+    if [ -n "$CONFLICT_AGENT" ]; then
+        if [ "$CONFLICT_AGENT" = "$AGENT_ID" ]; then
+            echo "[Telegram Binding Helper] ⚠️ 该群组的绑定路由已存在（已经是当前 Agent），跳过追加。"
+        else
+            echo "[Telegram Binding Helper] ❌ 严重拦截：Telegram 群组 ($GROUP_ID) 已经被另一位员工 ('$CONFLICT_AGENT') 绑定！"
+            echo "[Telegram Binding Helper] OpenClaw 暂不支持一个群组内存在多个 Agent (会导致消息路由混乱)。请更换群组，或先解绑 '$CONFLICT_AGENT'。"
+            exit 1
+        fi
     else
         NEXT_INDEX=$(openclaw config get bindings --json | jq 'length')
         openclaw config set "bindings[$NEXT_INDEX]" \

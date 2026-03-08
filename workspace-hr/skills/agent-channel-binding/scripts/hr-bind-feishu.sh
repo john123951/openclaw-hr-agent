@@ -51,13 +51,19 @@ echo "[Binding Helper] ✅ 成功绑定飞书基础账号渠道"
 if [ -n "$GROUP_ID" ]; then
     echo "[Binding Helper] 正在尝试绑定至特定飞书群: $GROUP_ID"
     
-    # Check existing
-    EXISTING_BIND=$(openclaw config get bindings --json | jq -r --arg agent "$AGENT_ID" --arg gid "$GROUP_ID" '
-        .[] | select(.agentId == $agent and .match.channel == "feishu" and .match.peer.id == $gid) | .agentId
-    ')
+    # Check existing bindings for this group ID
+    CONFLICT_AGENT=$(openclaw config get bindings --json | jq -r --arg gid "$GROUP_ID" '
+        .[] | select(.match.channel == "feishu" and .match.peer.id == $gid) | .agentId
+    ' | head -n 1)
     
-    if [ -n "$EXISTING_BIND" ]; then
-        echo "[Binding Helper] ⚠️ 该群组绑定已存在，跳过追加。"
+    if [ -n "$CONFLICT_AGENT" ]; then
+        if [ "$CONFLICT_AGENT" = "$AGENT_ID" ]; then
+            echo "[Binding Helper] ⚠️ 该群组绑定已存在（已经是当前 Agent），跳过追加。"
+        else
+            echo "[Binding Helper] ❌ 严重拦截：飞书群组 ($GROUP_ID) 已经被另一位员工 ('$CONFLICT_AGENT') 绑定！"
+            echo "[Binding Helper] OpenClaw 暂不支持一个群组内存在多个 Agent (会导致消息路由混乱)。请更换群组，或先解绑 '$CONFLICT_AGENT'。"
+            exit 1
+        fi
     else
         NEXT_INDEX=$(openclaw config get bindings --json | jq 'length')
         openclaw config set "bindings[$NEXT_INDEX]" \
