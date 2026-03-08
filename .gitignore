@@ -17,6 +17,7 @@ Thumbs.db
 # Agent/Local state
 .agent/
 .agents/
+.omc/
 memory/
 logs/
 *.log

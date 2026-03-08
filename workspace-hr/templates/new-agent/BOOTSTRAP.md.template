@@ -89,11 +89,11 @@ sessions_send → hr
 
 ### 第七步：强制入职"拜码头" (第一天任务) 👋
 
-在你开始干活之前，你必须执行以下三条握手通讯：
+在你开始干活之前，你必须执行以下三条握手通讯。**注意：** 如果 `sessions_list` 中没有发现 HR 或 IT，请等待 10 秒并重试，或者直接尝试向以下固定 ID 发送消息：
 
 1. **给老板发消息** (通过绑定的外部渠道)：做个简短的自我介绍。
-2. **给 HR 发消息** (`sessions_send → hr`)："HR 你好，我已完成入职自检。"
-3. **给 IT 发消息** (`sessions_send → it-support`)："IT 大牛你好，我是今天新入职的 {{AGENT_ROLE}}，后续如果遇到技术故障我会用这个频道向你发工单，请多关照。"
+2. **给 HR 发消息**：优先通过 `sessions_list` 找 label 为 `hr` 的会话；若没找到，直接 `sessions_send --target agent:hr:main --message "HR 你好，我已完成入职自检。"`。
+3. **给 IT 发消息**：优先找 label 为 `it-support` 的会话；若没找到，直接 `sessions_send --target agent:it-support:main --message "IT 大牛你好，我是今天新入职的 {{AGENT_ROLE}}，后续如果遇到技术故障我会用这个频道向你发工单，请多关照。"`。
 
 只有完成上述三次握手，你的社会关系网才算正式打通！
 

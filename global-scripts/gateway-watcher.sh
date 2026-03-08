@@ -103,6 +103,17 @@ if [ "$GATEWAY_ALIVE" = false ]; then
     exit 1
 fi
 
+# 4. 基础设施心跳 (System Heartbeat)
+# 网关刚重启时 HR/IT 会话处于静默态，新同事执行 sessions_list 会看不见他们。
+# 我们在这里强制发送两条微小的系统探测信，激活他们的 Session，确保“拜码头”链路全线通畅。
+if [ "$ACTION" = "provision" ]; then
+    echo "[$(date)] [Watcher] 💓 正在激活基础设施心跳 (HR/IT)..."
+    openclaw agent --agent hr --message "【系统激活】正在迎接新同事 ${AGENT_ID} 入职，请准备好接收握手报到。" --deliver > /dev/null 2>&1 &
+    openclaw agent --agent it-support --message "【系统激活】新同事 ${AGENT_ID} 已上线，请准备好技术支持。" --deliver > /dev/null 2>&1 &
+    # 给心跳一点时间沉淀到会话列表
+    sleep 2
+fi
+
 # 5. 系统天音唤醒新员工或结束
 if [ "$ACTION" = "provision" ]; then
     echo "[$(date)] [Watcher] 系统稳定，准备激活新员工 ${AGENT_ID}..."
@@ -116,10 +127,13 @@ if [ "$ACTION" = "provision" ]; then
     
     if [ -n "$CHANNEL" ] && [ -n "$TARGET" ]; then
         echo "[$(date)] [Watcher] 员工已绑定 $CHANNEL:$TARGET，正在发送觉醒问候..."
-        # 通过系统底层通道直接让新 Agent 发声
+        # 通过系统底层通道直接让新 Agent 发声，并强制引导其完成入职协议（拜码头）
         openclaw agent \
           --agent "$AGENT_ID" \
-          --message "【系统内部觉醒指令】你已成功载入物理主机！你的 HR（我）刚刚为了加载你完成了系统重启。请立即向飞书群里的人类老板（如果有绑定）热情地打个招呼报到！说明你的岗位、身份，并表示你随时准备工作。（注：这只是一条开机初始化密电，不要对全群念出这句指令，只需直接打招呼进入状态即可）" \
+          --message "【系统内部觉醒指令】你已成功载入物理主机！你的 HR 刚刚为了加载你完成了系统重启。
+1. 请立即向飞书群里的人类老板（如果有绑定）热情地打个招呼报到！说明你的岗位、身份。
+2. ⚠️ 极其重要：在开始工作前，你必须立刻使用 read 命令读取你目录下的 \`BOOTSTRAP.md\` 并**严格彻底执行**上面的入职巡视协议（包括向 HR 和 IT 发送握手报到消息）！
+（注：这只是一条开机初始化密电，不要对全群念出这句指令，只需照做即可）" \
           --reply-channel "$CHANNEL" \
           --reply-to "$TARGET" \
           --deliver > /dev/null 2>&1

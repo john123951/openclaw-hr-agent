@@ -57,20 +57,33 @@ openclaw config set "agents.list[<INDEX>].tools.deny" \
 
 ### 步骤 4：写入工作空间文件
 
-从模板生成并写入以下文件到 `~/.openclaw/workspace-<agentId>/`：
+**⚠️ 绝对禁止使用 `cat > EOF` 从零手搓这些文件！**
+你必须在你的创建脚本中，严格使用 `cp` 和 `sed` 基于预设模板来生成这三个文件到 `~/.openclaw/workspace-<agentId>/`。
+（注：新版模板已内置握手异常重试逻辑，务必完整继承）
 
-1. **AGENTS.md** — 基于 `{baseDir}/../../templates/new-agent/AGENTS.md.template`
-2. **SOUL.md** — 基于 `{baseDir}/../../templates/new-agent/SOUL.md.template`
-3. **BOOTSTRAP.md** — 基于 `{baseDir}/../../templates/new-agent/BOOTSTRAP.md.template`
+```bash
+# 生成 AGENTS.md
+cp "$HOME/.openclaw/workspace-hr/templates/new-agent/AGENTS.md.template" "${WORKSPACE}/AGENTS.md"
+sed -i '' "s/{{AGENT_NAME}}/${AGENT_NAME}/g" "${WORKSPACE}/AGENTS.md"
+sed -i '' "s/{{AGENT_ROLE}}/<岗位职责描写>/g" "${WORKSPACE}/AGENTS.md"
+sed -i '' "s/{{WORK_SCHEDULE}}/<工作时间>/g" "${WORKSPACE}/AGENTS.md"
+sed -i '' "s/{{AGENT_TOOLS_DESC}}/<工具说明>/g" "${WORKSPACE}/AGENTS.md"
+sed -i '' "s/{{KNOWLEDGE_FOCUS}}/<知识领域>/g" "${WORKSPACE}/AGENTS.md"
+sed -i '' "s/{{SAFETY_RULES}}/<安全红线>/g" "${WORKSPACE}/AGENTS.md"
 
-模板中的占位符替换规则：
-- `{{AGENT_ID}}` → agent ID
-- `{{AGENT_NAME}}` → agent 显示名称
-- `{{AGENT_ROLE}}` → 岗位职责描述
-- `{{AGENT_TOOLS_DESC}}` → 工具说明（人话）
-- `{{WORK_SCHEDULE}}` → 工作时间/频率
-- `{{SAFETY_RULES}}` → 安全红线
-- `{{KNOWLEDGE_FOCUS}}` → 知识领域
+# 生成 SOUL.md
+cp "$HOME/.openclaw/workspace-hr/templates/new-agent/SOUL.md.template" "${WORKSPACE}/SOUL.md"
+sed -i '' "s/{{AGENT_NAME}}/${AGENT_NAME}/g" "${WORKSPACE}/SOUL.md"
+sed -i '' "s/{{AGENT_ROLE}}/<岗位职责描写>/g" "${WORKSPACE}/SOUL.md"
+sed -i '' "s/{{SOUL_BELIEFS}}/<核心信念>/g" "${WORKSPACE}/SOUL.md"
+
+# 生成 BOOTSTRAP.md (至关重要，此文件关乎入职拜码头)
+cp "$HOME/.openclaw/workspace-hr/templates/new-agent/BOOTSTRAP.md.template" "${WORKSPACE}/BOOTSTRAP.md"
+sed -i '' "s/{{AGENT_ID}}/${AGENT_ID}/g" "${WORKSPACE}/BOOTSTRAP.md"
+sed -i '' "s/{{AGENT_NAME}}/${AGENT_NAME}/g" "${WORKSPACE}/BOOTSTRAP.md"
+sed -i '' "s/{{AGENT_ROLE}}/<岗位职责描写>/g" "${WORKSPACE}/BOOTSTRAP.md"
+sed -i '' "s/{{SAFETY_RULES}}/<安全红线>/g" "${WORKSPACE}/BOOTSTRAP.md"
+```
 
 ### 步骤 5：通道绑定与体验设置（如适用）
 
@@ -108,9 +121,8 @@ openclaw config validate
 
 ### 步骤 7：通过 Watcher Daemon 安全重启 Gateway（关键）
 
-Gateway 重启后你的进程会被杀掉，用户也收不到确认消息，甚至如果配置错误 Gateway 会崩溃。因此**绝对不能**直接调用 `openclaw gateway restart`。
-
-请运行系统自带的 Watcher 守护进程，它会负责安全的延时重启、故障自愈、大模型修复，并最终自动唤醒新角色！
+Gateway 重启后你的进程会被杀掉，系统将由 Watcher 接管。
+新版 Watcher 将自动执行 **“基础设施心跳” (Infrastructure Heartbeat)**，强制苏醒 HR 和 IT，确保新员工在执行 `BOOTSTRAP.md` 时能立即在会话列表中查看到同事。
 
 ```bash
 nohup $HOME/.openclaw/global-scripts/gateway-watcher.sh <agentId> provision > /tmp/watcher.log 2>&1 &
