@@ -19,11 +19,11 @@ description: 苏格拉底式询问流程，帮助用户定义新 AI agent 的需
 
 1. 从用户的话中提取：**做什么** + **为什么**
 2. **⚠️ 必须先检查本地可用模型**：
-   - 运行命令：`openclaw config get models.providers`
-   - 查看哪些 provider 启用了（`enabled: true`）或配置了 `apiKey`。
-   - **绝不**推荐未配置的模型（即使岗位模板里写了 anthropic）。
-3. 根据你的专业判断，结合本地可用模型，推断出以下信息：
-   - 推荐的模型（从本地可用模型中，轻量任务选基础模型，复杂任务选强大的模型，例如若只有 `openai` 则使用 `openai/gpt-5.4` 或类似可用模型）
+   - 运行命令：`openclaw models`
+   - 仔细查阅输出中的 Configured models 和 Fallbacks 列表，这些才是当前系统真正配置并健康可用的模型。
+   - **绝不**推荐未出现在 `openclaw models` 列表中的模型（即使任何其他文档里推荐过默认模型）。
+3. 根据你的专业判断，结合 `openclaw models` 的输出，推断出以下信息：
+   - 推荐的模型（从 Configured models 列表中挑选。轻量任务选基础模型，复杂任务选最强推理模型。如果遇到限流退回，请主动给出列表里的第二备选模型让用户抉择）
    - 推荐的 agent ID（英文小写，用连字符分隔）
    - 推荐的 agent 名称（含 emoji）
    - 推荐的工作时间/频率

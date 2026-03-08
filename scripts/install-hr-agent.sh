@@ -98,8 +98,6 @@ if [ "$AGENT_INDEX" = "-1" ]; then
     exit 1
 fi
 
-echo -e "  Agent 索引: $AGENT_INDEX"
-
 openclaw config set "agents.list[$AGENT_INDEX].model" "anthropic/claude-sonnet-4-5" 2>/dev/null
 echo -e "  ${GREEN}✓${NC} 模型: anthropic/claude-sonnet-4-5"
 
@@ -140,7 +138,12 @@ done
 # 复制 skills 和 scripts
 if [ -d "$WORKSPACE_SRC/skills" ]; then
     cp -r "$WORKSPACE_SRC/skills/" "$HR_WORKSPACE/skills/"
-    echo -e "  ${GREEN}✓${NC} skills/ (6 个技能)"
+    echo -e "  ${GREEN}✓${NC} skills/ (7 个技能已复制到主控区)"
+    
+    # 将 openclaw-mastery 同步安装到全局环境，供所有子 Agent 使用
+    mkdir -p "$HOME/.openclaw/skills"
+    cp -r "$WORKSPACE_SRC/skills/openclaw-mastery" "$HOME/.openclaw/skills/"
+    echo -e "  ${GREEN}✓${NC} global skills/ (高阶能力包已全局挂载)"
 fi
 cp -r "scripts/" "$HR_WORKSPACE/scripts/"
 echo -e "  ${GREEN}✓${NC} scripts/ (包含 Watcher Daemon)"

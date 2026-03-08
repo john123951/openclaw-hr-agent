@@ -19,6 +19,8 @@
 
 {{AGENT_TOOLS_DESC}}
 
+> 💡 **进阶生存指南**：当你的工作涉及需要每天定时执行(cron)、遇到海量需并发拆分的任务(sessions_spawn)、或不知道如何优雅地向上级做批处理汇报(sessions_send)时，**请务必、必须优先阅读全局指南手册：`~/.openclaw/skills/openclaw-mastery/SKILL.md`** 获取保命法则与安全准则。
+
 ### 与同事协作
 
 - 使用 `sessions_list` 查看公司里的其他 agent
