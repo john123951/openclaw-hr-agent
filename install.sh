@@ -83,6 +83,55 @@ deploy_global_skills() {
 }
 
 # ==============================================================================
+# 模块：渠道绑定向导 (Channel Binding)
+# ==============================================================================
+bind_agent_to_channel() {
+    local agent_id=$1
+    echo -e "\n  ${CYAN}[+] 为 '$agent_id' 配置渠道绑定 >>>${NC}"
+    echo -n -e "      是否需要将其绑定到即时通讯渠道 (如 飞书/Telegram/Discord 等)? [y/N] "
+    read -r do_bind < /dev/tty
+    if [[ "$do_bind" =~ ^[Yy]$ ]]; then
+        echo -e "      支持的渠道: 1) 飞书 (feishu)  2) Telegram (telegram)  3) Discord (discord)"
+        echo -n -e "      请输入渠道序号或英文名 (如 1 或 feishu): "
+        read -r channel_input < /dev/tty
+        
+        local channel=""
+        case "$channel_input" in
+            1|feishu*|Feishu*) channel="feishu" ;;
+            2|tele*|Tele*) channel="telegram" ;;
+            3|discord*|Discord*) channel="discord" ;;
+            *) echo -e "      ${YELLOW}未识别的渠道或跳过绑定。${NC}"; return ;;
+        esac
+        
+        echo -n -e "      请输入目标群组 / Peer ID (留空则默认绑定到该渠道的所有对话): "
+        read -r peer_id < /dev/tty
+        
+        local json_val=""
+        if [ -n "$peer_id" ]; then
+            json_val="{\"agentId\":\"$agent_id\",\"match\":{\"channel\":\"$channel\",\"peer\":{\"kind\":\"group\",\"id\":\"$peer_id\"}}}"
+        else
+            json_val="{\"agentId\":\"$agent_id\",\"match\":{\"channel\":\"$channel\"}}"
+        fi
+        
+        echo -e "      ${BLUE}正在注册绑定路由...${NC}"
+        local next_index=$(openclaw config get bindings --json | jq 'length')
+        openclaw config set "bindings[$next_index]" "$json_val" --strict-json
+        
+        if [ -n "$peer_id" ]; then
+            echo -n -e "      群内是否必须 @ 才能唤醒此 Agent ? [Y/n] "
+            read -r req_mention < /dev/tty
+            local bool_val="true"
+            if [[ "$req_mention" =~ ^[Nn]$ ]]; then
+                bool_val="false"
+            fi
+            openclaw config set "channels.$channel.groups.$peer_id.requireMention" "$bool_val" --strict-json >/dev/null 2>&1 || true
+        fi
+        
+        echo -e "      ${GREEN}✓${NC} '$agent_id' 已成功绑定至 $channel 渠道！"
+    fi
+}
+
+# ==============================================================================
 # 模块：安装 HR 部门 (HR Agent)
 # ==============================================================================
 deploy_hr_agent() {
@@ -112,11 +161,19 @@ deploy_hr_agent() {
         
         # 获取索引并设置工具锁
         AGENT_INDEX=$(openclaw config get agents.list | jq '[.[].id] | index("hr")')
-        # HR 绝不应该有危险的 write 和 browser 权限
-        openclaw config set "agents.list[$AGENT_INDEX].tools.allow" '["read","exec"]' --strict-json
+        # HR 绝不应该有危险的 write 和 browser 权限，但引入从 hr-recruiter 借鉴的 memory 和 subagent 能力
+        openclaw config set "agents.list[$AGENT_INDEX].tools.allow" '["read","exec","sessions_spawn","sessions_list","sessions_send","sessions_history","agents_list","memory_search","memory_get","message","web_fetch"]' --strict-json
         openclaw config set "agents.list[$AGENT_INDEX].tools.deny" '["write","edit","browser","canvas","nodes"]' --strict-json
         # HR 需要运行 shell 脚本（创建新 Agent 的关键能力），必须显式设置 exec 主机为 gateway
         openclaw config set "agents.list[$AGENT_INDEX].tools.exec.host" '"gateway"' --strict-json
+        
+        # 优化：添加 groupChat.mentionPatterns 提升群聊唤醒体验
+        openclaw config set "agents.list[$AGENT_INDEX].groupChat.mentionPatterns" '["@hr", "@HR", "@招聘官", "@招人", "@招聘", "@hr-support", "@人事"]' --strict-json
+        
+        # 优化：赋予 HR 调度和协同配置中其他 Agent（例如招聘）的能力
+        openclaw config set "agents.list[$AGENT_INDEX].subagents.allowAgents" '["*"]' --strict-json
+        
+        bind_agent_to_channel "hr"
     fi
     
     # 始终同步文件
@@ -159,6 +216,11 @@ deploy_it_agent() {
         openclaw config set "agents.list[$AGENT_INDEX].tools.deny" '["browser","canvas","nodes"]' --strict-json
         # IT 需要高权限 exec 执行 shell 脚本，必须显式设置 exec 主机为 gateway
         openclaw config set "agents.list[$AGENT_INDEX].tools.exec.host" '"gateway"' --strict-json
+        
+        # 优化：添加 groupChat.mentionPatterns 提升群聊唤醒体验
+        openclaw config set "agents.list[$AGENT_INDEX].groupChat.mentionPatterns" '["@it", "@IT", "@网管", "@it-support"]' --strict-json
+        
+        bind_agent_to_channel "it-support"
     fi
     
     IT_WORKSPACE=$(openclaw config get "agents.list[$(openclaw config get agents.list | jq '[.[].id] | index("it-support")')].workspace" 2>/dev/null || echo "$HOME/.openclaw/workspace-it")
