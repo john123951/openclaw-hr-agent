@@ -102,11 +102,6 @@ if [ -n "$GROUP_ID" ]; then
         echo "[Telegram Binding Helper] 🔄 设置群聊消息引用模式: $REPLY_MODE"
         openclaw config set "channels.telegram.groups.$GROUP_ID.replyToMode" "\"$REPLY_MODE\"" --strict-json > /dev/null 2>&1 || true
     fi
-
-else
-    # ── 路径 B：无指定群组，绑定基础渠道账号 ──────────────────────────────────
-    openclaw agents bind --agent "$AGENT_ID" --bind "telegram:default" > /dev/null 2>&1 || true
-    echo "[Telegram Binding Helper] ✅ 成功绑定 Telegram 基础账号渠道 (accountId:default)"
 fi
 
 # 最终安全校验
