@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# HR Agent Gateway Watcher 
-# 该脚本由 HR Agent 在确认流程后分离运行，用于安全重启 Gateway 并处理报错自愈。
-# 用法: nohup ./hr-gateway-watcher.sh <agent-id> [action] > /tmp/hr-watcher.log 2>&1 &
+# OpenClaw 基础后勤基座守护程序 (Base-Ops Gateway Watcher)
+# 该脚本由代理执行核心操作后分离运行，用于安全重启 Gateway 并处理报错自愈。
+# 用法: nohup $HOME/.openclaw/scripts/gateway-watcher.sh <agent-id> [action] > /tmp/watcher.log 2>&1 &
 
 set -e
 

@@ -1,8 +1,10 @@
-# 🧑‍💼 HR Agent — OpenClaw AI 员工招聘系统
+# 🏢 OpenClaw Base-Ops (企业后勤双子星)
 
 [中文](README.md) | [English](README_EN.md)
 
-基于 [OpenClaw](https://github.com/nichochar/openclaw) 多 Agent 框架的 AI 人力资源经理。能够通过纯自然语言对话，自动帮你完成新 AI Agent 员工的探索、招聘、档案建立以及入职配置。
+**OpenClaw Base-Ops** 是一套为 [OpenClaw](https://github.com/openclaw/openclaw) 多智能体框架打造的**全自动化企业后勤基座项目**。
+它将原本繁琐的系统底层干预工作剥离出来，赋予了两位极其专业的 AI 职员：**HR 总监** 和 **IT 极客大牛**。
+通过统一的向导脚本 `install.sh` 一键装载后，这两位超级管家将默默在后台包揽人员进出、通道分配以及原生代码工具的火线开发，让你彻底摆脱“为了让 AI 干活还得自己写配制”的困扰。
 
 ## ✨ 特性
 

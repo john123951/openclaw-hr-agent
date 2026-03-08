@@ -105,7 +105,7 @@ Gateway 重启后你的进程会被杀掉，用户也收不到确认消息，甚
 请运行系统自带的 Watcher 守护进程，它会负责安全的延时重启、故障自愈、大模型修复，并最终自动唤醒新角色！
 
 ```bash
-nohup $HOME/.openclaw/workspace-hr/scripts/hr-gateway-watcher.sh <agentId> provision > /tmp/hr-watcher.log 2>&1 &
+nohup $HOME/.openclaw/scripts/gateway-watcher.sh <agentId> provision > /tmp/watcher.log 2>&1 &
 ```
 
 执行后，立即回复用户："✅ 新同事 <Agent名称> 的档案已建好！系统正由 Watcher 接管，将在后台进行安全校验与重启... 苏醒后新同事会亲自向您报告！"

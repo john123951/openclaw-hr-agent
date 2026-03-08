@@ -1,8 +1,10 @@
-# 🧑‍💼 HR Agent — OpenClaw AI Employee Recruitment System
+# 🏢 OpenClaw Base-Ops (Enterprise Backup Operations Twin)
 
-[English](README.md) | [中文](README_CN.md)
+[English](README_EN.md) | [中文](README.md)
 
-An AI Human Resources Manager based on the [OpenClaw](https://github.com/nichochar/openclaw) multi-agent framework. It helps you "recruit" new AI agent employees through natural conversation.
+**OpenClaw Base-Ops** is a fully automated twin-agent enterprise backup operations infrastructure built for the [OpenClaw](https://github.com/openclaw/openclaw) multi-agent framework.
+It delegates tedious system configuration and maintenance to two highly professional AI employees: the **HR Director** and the **IT Geek**.
+With a single interactive `install.sh` script, you can deploy these two super-agents to handle onboarding, tool scripting, and environment operations, letting your human and AI teams focus strictly on main business logic.
 
 ## ✨ Features
 
