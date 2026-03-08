@@ -2,6 +2,11 @@
 # HR Agent Binding Helper
 # 用法: ./hr-bind-feishu.sh <agent-id> [group-id] [--require-mention true|false] [--reply-to all|first|off]
 # 目的: 安全地将 agent 绑定到 feishu channel，并且允许通过标志位配置群聊免打扰、提及要求与API优化。
+#
+# ⚠️ 设计原则：
+#   - 若提供了 GROUP_ID，只绑定 peer-specific 群组路由，绝不同时创建 accountId:default 通配绑定
+#   - 若没有提供 GROUP_ID，只绑定基础 feishu:default 渠道（无 peer 过滤）
+#   - requireMention 必须在脚本中 100% 显式配置，不允许留空由系统自行决定
 
 set -e
 
@@ -41,21 +46,24 @@ if [ -z "$AGENT_ID" ]; then
     exit 1
 fi
 
+if [ -z "$GROUP_ID" ]; then
+    echo "[Binding Helper] ℹ️ 未提供群组 ID，跳过渠道绑定。新员工将仅在后台待命。"
+    exit 0
+fi
+
 echo "[Binding Helper] 开始为 Agent '$AGENT_ID' 绑定飞书渠道..."
 
-# 1. 总是确保基础的 channel 绑定存在
-openclaw agents bind --agent "$AGENT_ID" --bind "feishu:default" > /dev/null 2>&1 || true
-echo "[Binding Helper] ✅ 成功绑定飞书基础账号渠道"
-
-# 2. 如果提供了 Group ID，进行高级群组 peer 配置
 if [ -n "$GROUP_ID" ]; then
-    echo "[Binding Helper] 正在尝试绑定至特定飞书群: $GROUP_ID"
-    
-    # Check existing bindings for this group ID
+    # ── 路径 A：指定群组 ──────────────────────────────────────────────────────
+    # 只创建 peer-specific 群组绑定，不创建通配的 accountId:default 绑定
+    # 以防止出现两条 binding entry 的 bug
+    echo "[Binding Helper] 正在绑定至特定飞书群: $GROUP_ID"
+
+    # 检查是否已有任何 Agent 绑定了该群组
     CONFLICT_AGENT=$(openclaw config get bindings --json | jq -r --arg gid "$GROUP_ID" '
         .[] | select(.match.channel == "feishu" and .match.peer.id == $gid) | .agentId
     ' | head -n 1)
-    
+
     if [ -n "$CONFLICT_AGENT" ]; then
         if [ "$CONFLICT_AGENT" = "$AGENT_ID" ]; then
             echo "[Binding Helper] ⚠️ 该群组绑定已存在（已经是当前 Agent），跳过追加。"
@@ -72,16 +80,16 @@ if [ -n "$GROUP_ID" ]; then
         echo "[Binding Helper] ✅ 成功追加飞书群组 peer 路由 ($GROUP_ID)"
     fi
 
-    # 配置是否需要 @mention
+    # ── requireMention 必须显式配置（100% 强制执行）──────────────────────────
     if [ "$REQ_MENTION" = "false" ]; then
-        echo "[Binding Helper] 🔄 设置群组内 [无需 @ 即可唤醒]"
+        echo "[Binding Helper] 🔄 设置群组内 [无需 @ 即可唤醒] (requireMention=false)"
         openclaw config set "channels.feishu.groups.$GROUP_ID.requireMention" false --strict-json > /dev/null 2>&1 || true
     else
-        echo "[Binding Helper] 🔄 设置群组内 [必须严格 @ 才可唤醒]"
+        echo "[Binding Helper] 🔄 设置群组内 [必须严格 @ 才可唤醒] (requireMention=true)"
         openclaw config set "channels.feishu.groups.$GROUP_ID.requireMention" true --strict-json > /dev/null 2>&1 || true
     fi
 
-    # 配置文件级的回复模式 (及关闭冲突的卡片流)
+    # ── 回复引用模式 ──────────────────────────────────────────────────────────
     if [ -n "$REPLY_MODE" ]; then
         if [ "$REPLY_MODE" != "off" ]; then
             # 开启引用箭头必须关闭流式输出，否则冲突
@@ -92,6 +100,11 @@ if [ -n "$GROUP_ID" ]; then
         echo "[Binding Helper] 🔄 设置群聊消息引用模式: $REPLY_MODE"
         openclaw config set "channels.feishu.groups.$GROUP_ID.replyToMode" "\"$REPLY_MODE\"" --strict-json > /dev/null 2>&1 || true
     fi
+
+else
+    # ── 路径 B：无指定群组，绑定基础渠道账号 ──────────────────────────────────
+    openclaw agents bind --agent "$AGENT_ID" --bind "feishu:default" > /dev/null 2>&1 || true
+    echo "[Binding Helper] ✅ 成功绑定飞书基础账号渠道 (accountId:default)"
 fi
 
 # 验证最终配置

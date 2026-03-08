@@ -74,21 +74,25 @@ openclaw config set "agents.list[<INDEX>].tools.deny" \
 
 #### 飞书渠道
 ```bash
-# 例子：有问必答（需要@，流式输出）
-$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
-
-# 例子：全局监控（免@，引用回复）
+# 默认：免 @ 全局监控（强烈推荐默认配置）
 $HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention false --reply-to all
+
+# 可选：有问必答（需要@，关闭引用）
+$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
 ```
 
 #### Telegram 渠道
 ```bash
-# 例子：有问必答（需要@）
-$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
-
-# 例子：全局监控（免@，引用回复）
+# 默认：免 @ 全局监控
 $HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> --require-mention false --reply-to all
+
+# 可选：有问必答
+$HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
 ```
+
+**⚠️ 对于飞书群组绑定：绑定完成后，必须尝试修改飞书群名！**
+请参考 `agent-channel-binding` 技能中的《修改飞书群名》章节，且务必在启动 Watcher 之前完成此步骤。
+如果读取飞书凭据失败，跳过并告知用户需要手动改群名。
 
 千万不要尝试用 `jq` 手动修改 `bindings` 数组，这极其容易引发崩溃！
 
@@ -105,7 +109,7 @@ Gateway 重启后你的进程会被杀掉，用户也收不到确认消息，甚
 请运行系统自带的 Watcher 守护进程，它会负责安全的延时重启、故障自愈、大模型修复，并最终自动唤醒新角色！
 
 ```bash
-nohup $HOME/.openclaw/scripts/gateway-watcher.sh <agentId> provision > /tmp/watcher.log 2>&1 &
+nohup $HOME/.openclaw/global-scripts/gateway-watcher.sh <agentId> provision > /tmp/watcher.log 2>&1 &
 ```
 
 执行后，立即回复用户："✅ 新同事 <Agent名称> 的档案已建好！系统正由 Watcher 接管，将在后台进行安全校验与重启... 苏醒后新同事会亲自向您报告！"

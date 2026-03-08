@@ -9,7 +9,7 @@
 ## 🚀 极速一键装载
 
 最简单的安装方式，直接对你的 OpenClaw 助手说：
-> "帮我安装这个后勤管家生态：https://github.com/john123951/openclaw-hr-agent"
+> "帮我安装这个OpenClaw人事总监：https://github.com/john123951/openclaw-hr-agent"
 
 或者，你也可以在终端中运行以下命令，全自动静默安装全局守护系统并拉起两位后勤管家：
 

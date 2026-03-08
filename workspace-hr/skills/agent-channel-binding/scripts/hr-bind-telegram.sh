@@ -2,6 +2,11 @@
 # HR Agent Telegram Binding Helper
 # 用法: ./hr-bind-telegram.sh <agent-id> [group-id] [--require-mention true|false] [--reply-to all|first|off]
 # 目的: 安全地将 agent 绑定到 Telegram channel，并初始化群组白名单、免打扰规则与拟真反应等级。
+#
+# ⚠️ 设计原则：
+#   - 若提供了 GROUP_ID，只绑定 peer-specific 群组路由，绝不同时创建 accountId:default 通配绑定
+#   - 若没有提供 GROUP_ID，只绑定基础 telegram:default 渠道（无 peer 过滤）
+#   - requireMention 必须在脚本中 100% 显式配置，不允许留空由系统自行决定
 
 set -e
 
@@ -41,26 +46,28 @@ if [ -z "$AGENT_ID" ]; then
     exit 1
 fi
 
+if [ -z "$GROUP_ID" ]; then
+    echo "[Telegram Binding Helper] ℹ️ 未提供群组 ID，跳过渠道绑定。新员工将仅在后台待命。"
+    exit 0
+fi
+
 echo "[Telegram Binding Helper] 开始为 Agent '$AGENT_ID' 绑定 Telegram 渠道..."
 
-# 1. 绑定基础渠道
-openclaw agents bind --agent "$AGENT_ID" --bind "telegram:default" > /dev/null 2>&1 || true
-echo "[Telegram Binding Helper] ✅ 成功绑定 Telegram 基础账号渠道"
-
-# 2. 全局环境预置：开启基础的拟真互动反应
-# 这会让机器人在读取到消息后，根据内部策略偶尔回复一个👀或点赞，增加团队真实感
+# 全局环境预置：开启基础的拟真互动反应
 openclaw config set "channels.telegram.reactionLevel" "\"minimal\"" --strict-json > /dev/null 2>&1 || true
 echo "[Telegram Binding Helper] 🔄 已开启 Agent 拟真表情反馈 (reactionLevel=minimal)"
 
-# 3. 群组级精确控制
 if [ -n "$GROUP_ID" ]; then
+    # ── 路径 A：指定群组 ──────────────────────────────────────────────────────
+    # 只创建 peer-specific 群组绑定，不创建通配的 accountId:default 绑定
+    # 以防止出现两条 binding entry 的 bug
     echo "[Telegram Binding Helper] 处理目标群组: $GROUP_ID"
-    
+
     # 检查是否已有任何 Agent 绑定了该群组
     CONFLICT_AGENT=$(openclaw config get bindings --json | jq -r --arg gid "$GROUP_ID" '
         .[] | select(.match.channel == "telegram" and .match.peer.id == $gid) | .agentId
     ' | head -n 1)
-    
+
     if [ -n "$CONFLICT_AGENT" ]; then
         if [ "$CONFLICT_AGENT" = "$AGENT_ID" ]; then
             echo "[Telegram Binding Helper] ⚠️ 该群组的绑定路由已存在（已经是当前 Agent），跳过追加。"
@@ -78,23 +85,28 @@ if [ -n "$GROUP_ID" ]; then
     fi
 
     # 在 Telegram 渠道白名单 (groups) 中登记此群组，建立强安全屏障
-    # 只要这群在这个对象里哪怕是个空对象 {}，也代表这是一个认证过的群组
     openclaw config set "channels.telegram.groups.$GROUP_ID" "{}" --strict-json > /dev/null 2>&1 || true
     echo "[Telegram Binding Helper] 🔒 群组已挂载至白名单安全池"
 
-    # 配置群组级别交互设置
+    # ── requireMention 必须显式配置（100% 强制执行）──────────────────────────
     if [ "$REQ_MENTION" = "false" ]; then
-        echo "[Telegram Binding Helper] 🔄 设置群组内 [无需 @ 即可唤醒]"
+        echo "[Telegram Binding Helper] 🔄 设置群组内 [无需 @ 即可唤醒] (requireMention=false)"
         openclaw config set "channels.telegram.groups.$GROUP_ID.requireMention" false --strict-json > /dev/null 2>&1 || true
     else
-        echo "[Telegram Binding Helper] 🔄 设置群组内 [必须严格 @ 才可唤醒]"
+        echo "[Telegram Binding Helper] 🔄 设置群组内 [必须严格 @ 才可唤醒] (requireMention=true)"
         openclaw config set "channels.telegram.groups.$GROUP_ID.requireMention" true --strict-json > /dev/null 2>&1 || true
     fi
 
+    # ── 回复引用模式 ──────────────────────────────────────────────────────────
     if [ -n "$REPLY_MODE" ]; then
         echo "[Telegram Binding Helper] 🔄 设置群聊消息引用模式: $REPLY_MODE"
         openclaw config set "channels.telegram.groups.$GROUP_ID.replyToMode" "\"$REPLY_MODE\"" --strict-json > /dev/null 2>&1 || true
     fi
+
+else
+    # ── 路径 B：无指定群组，绑定基础渠道账号 ──────────────────────────────────
+    openclaw agents bind --agent "$AGENT_ID" --bind "telegram:default" > /dev/null 2>&1 || true
+    echo "[Telegram Binding Helper] ✅ 成功绑定 Telegram 基础账号渠道 (accountId:default)"
 fi
 
 # 最终安全校验

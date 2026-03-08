@@ -113,8 +113,10 @@ deploy_hr_agent() {
         # 获取索引并设置工具锁
         AGENT_INDEX=$(openclaw config get agents.list | jq '[.[].id] | index("hr")')
         # HR 绝不应该有危险的 write 和 browser 权限
-        openclaw config set "agents.list[$AGENT_INDEX].tools.allow" '["read","exec","cron"]' --strict-json
+        openclaw config set "agents.list[$AGENT_INDEX].tools.allow" '["read","exec"]' --strict-json
         openclaw config set "agents.list[$AGENT_INDEX].tools.deny" '["write","edit","browser","canvas","nodes"]' --strict-json
+        # HR 需要运行 shell 脚本（创建新 Agent 的关键能力），必须显式设置 exec 主机为 gateway
+        openclaw config set "agents.list[$AGENT_INDEX].tools.exec.host" '"gateway"' --strict-json
     fi
     
     # 始终同步文件
@@ -153,8 +155,10 @@ deploy_it_agent() {
         
         AGENT_INDEX=$(openclaw config get agents.list | jq '[.[].id] | index("it-support")')
         # IT 必须拥有最高文件写入权和外围执行权！
-        openclaw config set "agents.list[$AGENT_INDEX].tools.allow" '["read","write","edit","exec","cron"]' --strict-json
+        openclaw config set "agents.list[$AGENT_INDEX].tools.allow" '["read","write","edit","exec"]' --strict-json
         openclaw config set "agents.list[$AGENT_INDEX].tools.deny" '["browser","canvas","nodes"]' --strict-json
+        # IT 需要高权限 exec 执行 shell 脚本，必须显式设置 exec 主机为 gateway
+        openclaw config set "agents.list[$AGENT_INDEX].tools.exec.host" '"gateway"' --strict-json
     fi
     
     IT_WORKSPACE=$(openclaw config get "agents.list[$(openclaw config get agents.list | jq '[.[].id] | index("it-support")')].workspace" 2>/dev/null || echo "$HOME/.openclaw/workspace-it")
