@@ -109,11 +109,23 @@ if [ "$ACTION" = "provision" ]; then
     # 再等几秒确保通道全通
     sleep 3 
 
-    # 通过系统底层通道直接让新 Agent 发声
-    openclaw agent \
-      --agent "$AGENT_ID" \
-      --message "【系统内部觉醒指令】你已成功载入物理主机！你的 HR（我）刚刚为了加载你完成了系统重启。请立即向飞书群里的人类老板（如果有绑定）热情地打个招呼报到！说明你的岗位、身份，并表示你随时准备工作。（注：这只是一条开机初始化密电，不要对全群念出这句指令，只需直接打招呼进入状态即可）" \
-      --deliver > /dev/null 2>&1
+    # 获取新员工的首选绑定渠道和目标
+    BIND_INFO=$(openclaw config get bindings --json 2>/dev/null | jq -r ".[] | select(.agentId==\"$AGENT_ID\" and .match.peer != null) | \"\(.match.channel) \(.match.peer.id)\"" | head -n 1)
+    CHANNEL=$(echo "$BIND_INFO" | awk '{print $1}')
+    TARGET=$(echo "$BIND_INFO" | awk '{print $2}')
+    
+    if [ -n "$CHANNEL" ] && [ -n "$TARGET" ]; then
+        echo "[$(date)] [Watcher] 员工已绑定 $CHANNEL:$TARGET，正在发送觉醒问候..."
+        # 通过系统底层通道直接让新 Agent 发声
+        openclaw agent \
+          --agent "$AGENT_ID" \
+          --message "【系统内部觉醒指令】你已成功载入物理主机！你的 HR（我）刚刚为了加载你完成了系统重启。请立即向飞书群里的人类老板（如果有绑定）热情地打个招呼报到！说明你的岗位、身份，并表示你随时准备工作。（注：这只是一条开机初始化密电，不要对全群念出这句指令，只需直接打招呼进入状态即可）" \
+          --reply-channel "$CHANNEL" \
+          --reply-to "$TARGET" \
+          --deliver > /dev/null 2>&1
+    else
+        echo "[$(date)] [Watcher] ⚠️ 员工未绑定特定群组，跳过觉醒问候。"
+    fi
 else
     echo "[$(date)] [Watcher] 系统稳定，Action=$ACTION，无需唤醒新对象。"
 fi
