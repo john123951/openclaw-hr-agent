@@ -16,6 +16,15 @@ NC='\033[0m'
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# CURL 管道执行支持：动态拉取源码
+if [ ! -d "$PROJECT_DIR/workspace-hr" ] || [ ! -d "$PROJECT_DIR/global-skills" ]; then
+    echo -e "${YELLOW}ℹ️ 正在从 GitHub 下载最新版本...${NC}"
+    TMP_DIR=$(mktemp -d /tmp/openclaw-hr-agent)
+    git clone --quiet https://github.com/john123951/openclaw-hr-agent.git "$TMP_DIR"
+    PROJECT_DIR="$TMP_DIR"
+    trap 'rm -rf "$TMP_DIR"' EXIT
+fi
+
 # 前置检查
 if ! command -v openclaw &> /dev/null; then
     echo -e "${RED}错误: 未检测到 openclaw 核心库。请先安装: npm install -g @openclaw/cli${NC}"
@@ -50,7 +59,7 @@ deploy_global_skills() {
                 target_path="$HOME/.openclaw/skills/$skill_name"
                 if [ -d "$target_path" ]; then
                     echo -n -e "  ${YELLOW}⚠️ 全局技能 '$skill_name' 已存在，是否强制覆盖升级? [y/N]${NC} "
-                    read -r overwrite
+                    read -r overwrite < /dev/tty
                     if [[ "$overwrite" =~ ^[Yy]$ ]]; then
                         cp -r "$skill_path" "$HOME/.openclaw/skills/"
                         echo -e "  ${GREEN}✓${NC} global-skills/$skill_name (安全覆盖完成)"
@@ -84,7 +93,7 @@ deploy_hr_agent() {
     if [ -n "$agent_exists" ]; then
         echo -e "  ${YELLOW}ℹ️ 系统中已存在 ID 为 'hr' 的角色。${NC}"
         echo -n -e "    是否跳过底层初始化，仅热更其大脑(Workspace)文件？（强烈推荐） [Y/n] "
-        read -r merely_update
+        read -r merely_update < /dev/tty
         if [[ -z "$merely_update" || "$merely_update" =~ ^[Yy]$ ]]; then
             echo -e "  ${GREEN}✓${NC} 保留了现有的渠道绑定与密钥生态。"
             skip_init="true"
@@ -179,7 +188,7 @@ echo -e "  [1] 全局能力包 (推荐，赋能所有终端员工的高阶兵器
 echo -e "  [2] HR 后勤节点 (人力招募/业务监控守护程序)"
 echo -e "  [3] IT 后勤节点 (技术支援/全局脚本热开发引擎)"
 echo -n -e "您的选择 (例如: 1 2 3 或 2 3): "
-read -r sel
+read -r sel < /dev/tty
 if [ -z "$sel" ]; then
     sel="1 2 3"
 fi

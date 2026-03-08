@@ -1,21 +1,30 @@
-# 🏢 OpenClaw Base-Ops (企业后勤双子星)
+# 🧑‍💼 OpenClaw HR Agent
 
 [中文](README.md) | [English](README_EN.md)
 
-**OpenClaw Base-Ops** 是一套为 [OpenClaw](https://github.com/openclaw/openclaw) 多智能体框架打造的**全自动化企业后勤基座项目**。
-它将原本繁琐的系统底层干预工作剥离出来，赋予了两位极其专业的 AI 职员：**HR 总监** 和 **IT 极客大牛**。
-通过统一的向导脚本 `install.sh` 一键装载后，这两位超级管家将默默在后台包揽人员进出、通道分配以及原生代码工具的火线开发，让你彻底摆脱“为了让 AI 干活还得自己写配制”的困扰。
+**还在为了新建一个 AI Agent 去苦哈哈地手写 JSON 配置和写长篇 Prompt 吗？把这件事交给专门的 HR 吧！**
 
-## ✨ 特性
+**OpenClaw HR Agent** 是一款专为 [OpenClaw](https://github.com/openclaw/openclaw) 框架打造的**全自动 AI 员工招募管家**。
+它直击用户的核心痛点：你只需用自然语言对它说“我需要一个程序员”或“帮我招一个股票盯盘助手”，它就会通过苏格拉底式的对话摸清你的需求，并在底层**全自动完成**身份创立、模型分配、工具赋权、通信渠道绑定（飞书/TG/Discord）以及专属脑库的初始化。
 
-- **苏格拉底式招聘** — 渐进式对话机制，最快 3 轮交互摸清你的真实需求，避免“连环十问”。
-- **脚本原生操作** — 全程通过调用 `openclaw` CLI 部署新员工，告别手动编辑复杂的 JSON 配置文件。
-- **多渠道跨平台** — 支持将员工无缝外派到飞书（Lark）、Telegram、Discord，并支持自动修改飞书群名等高级 API 联动。
-- **随身知识库** — 招聘时不仅建人，连带生成针对所属岗位的领域知识库及语义搜索架构。
-- **环境感知式入职** — 新 Agent 在首次运行前，即可通过初始化文件（Bootstrap），认识人类老板和其他同事，掌握公司制度。
-- **8 种开箱即用的热门岗位** — 天气助手、股票盯盘、程序员、文案写手、运营专员、研究员、产品经理及 CEO 专属顾问。
-- **智能守护神 (Auto-Healing Watcher)** — 由于创建 Agent 涉及到底层的 Gateway 重启，附带的智能后台守护脚本会自动接管。如果重启时遇到配置文件报错，它会主动唤醒大模型（`claudecode`, `codex`, `gemini`）自动修补配置并完成二次急救，甚至失败后会自动做物理快照回滚。
-- **好聚好散 (Graceful Dismissal)** — 不仅管招还管辞！内置辞退技能，一键安全卸载并清空对应 Agent 的所有系统权限，走之前还会温馨地把它的工作台打包成压缩包存入垃圾站档案室。
+此外，它还自带了一套强大的后勤系统（Base-Ops），当新进的 AI 员工缺少特定代码工具时，自带的 IT 支援节点甚至能当场手搓代码热更新给你，让你彻底告别繁琐的底层系统干预。
+
+## 🚀 一键安装
+
+只需在终端中运行以下命令，即可全自动安装并配置 OpenClaw Base-Ops：
+
+```bash
+curl -sL https://raw.githubusercontent.com/john123951/openclaw-hr-agent/refs/heads/main/install.sh | bash
+```
+
+## ✨ 核心痛点解决
+
+- **告别手写 JSON 配置** — 全程通过调用底层 CLI 部署新员工，不再需要手动干预易错的物理文件。
+- **苏格拉底式极速招聘** — 抛弃“连环十问”的死板问卷。HR 会主动推断你的盲区需求，最快只需 3 轮对话即可敲定岗位架构。
+- **自动打通通信平台** — 一键将新员工自动外派到飞书（Lark）、Telegram、Discord，并支持自动修改飞书群名等 API 联动。
+- **社会化环境向导** — 拒绝新员工“空降”。他们会在入职第一秒自动认识老板、了解公司权责图，并被强制要求向 IT 部门“拜码头”。
+- **附赠 8 种开箱即用的牛马** — 天气助手、股票盯盘、程序员、文案写手、运营专员、研究员、产品经理及 CEO 专属顾问，即开即用。
+- **自带大模型极客抢救机制** — 系统内置了 Watcher 守护进程，如果创建 Agent 导致底层配置文件报错，它会主动唤醒大模型（如 Claude/Gemini）现场修 Bug 并热恢复。
 
 ## 📁 项目结构
 
@@ -88,7 +97,6 @@ openclaw agents bind --agent hr --bind telegram:default
 
 # 绑定到 Discord
 openclaw agents bind --agent hr --bind discord:default
-
 
 # 重启使新通道入口生效
 openclaw gateway restart

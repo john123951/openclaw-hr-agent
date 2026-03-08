@@ -1,21 +1,29 @@
-# 🏢 OpenClaw Base-Ops (Enterprise Backup Operations Twin)
+# 🧑‍💼 OpenClaw HR Agent
 
 [English](README_EN.md) | [中文](README.md)
 
-**OpenClaw Base-Ops** is a fully automated twin-agent enterprise backup operations infrastructure built for the [OpenClaw](https://github.com/openclaw/openclaw) multi-agent framework.
-It delegates tedious system configuration and maintenance to two highly professional AI employees: the **HR Director** and the **IT Geek**.
-With a single interactive `install.sh` script, you can deploy these two super-agents to handle onboarding, tool scripting, and environment operations, letting your human and AI teams focus strictly on main business logic.
+**Still manually editing JSON configs and writing lengthy prompts just to initialize a new AI Agent? Let your HR handle it!**
 
-## ✨ Features
+**OpenClaw HR Agent** is a fully automated recruitment manager built for the [OpenClaw](https://github.com/openclaw/openclaw) multi-agent framework. 
+It targets the core pain point of agent management setup: just tell the HR in plain English, "I need a programmer" or "Hire me a stock monitor", and it will automatically capture your underlying requirements through a concise Socratic dialogue. Then, it autonomously handles identity creation, model allocation, tool permission routing, multi-channel binding (Feishu/Telegram/Discord), and knowledge-base initialization.
 
-- **Socratic Recruitment** — 3-stage progressive dialogue, completing recruitment in as few as 3 turns.
-- **Scripted Provisioning** — Uses the `openclaw` CLI for everything, eliminating manual JSON edits.
-- **Multi-Channel Binding** — Supports Feishu (Lark), Telegram, and Discord, including automatic group renaming via the Feishu API.
-- **Knowledge Base Setup** — Initializes a dedicated knowledge management system for each new agent.
-- **Context-Aware Onboarding** — New agents automatically get to know their colleagues, familiar tools, and company environment.
-- **8 Pre-configured Roles** — Weather Assistant, Stock Monitor, Programmer, Copywriter, Ops Specialist, Researcher, Product Manager, and CEO Advisor.
-- **Auto-Healing Watcher** — Includes a robust daemon that safely restarts the OpenClaw gateway and automatically repairs JSON config errors using LLMs (`claudecode`, `codex`, or `gemini`).
-- **Graceful Dismissal** — Skill to fire agents, cleanly revoking their access and automatically archiving their workspace to the system trash.
+Furthermore, it arrives with a built-in Base-Ops infrastructure: an auto-healing watcher daemon and a dedicated IT support agent capable of hot-writing code tools for your new hires, completely liberating you from low-level system configuration.
+
+## 🚀 Quick Install
+
+Run the following command in your terminal for a fully automated, one-click installation of OpenClaw Base-Ops:
+
+```bash
+curl -sL https://raw.githubusercontent.com/john123951/openclaw-hr-agent/refs/heads/main/install.sh | bash
+```
+## ✨ Core Pain Points Solved
+
+- **Zero JSON Editing** — Everything is natively orchestrated using CLI commands, completely eliminating manual config errors.
+- **Socratic Rapid Recruitment** — No more rigid 10-question surveys. The HR smartly infers your needs, often finalizing a new role architecture in just 3 conversational turns.
+- **Automated Channel Binding** — Effortlessly deploy your new hires directly to Feishu (Lark), Telegram, or Discord. It even handles advanced API syncs like renaming Feishu groups.
+- **Sociological Onboarding** — Hires aren't just "dropped in". They arrive with an onboarding protocol, get to know their boss, learn the company structure, and dynamically "shake hands" with the IT team.
+- **8 Pre-configured Workhorses** — Start instantly with predefined templates for a Weather Assistant, Stock Monitor, Programmer, Copywriter, Ops Specialist, Researcher, Product Manager, or CEO Advisor.
+- **LLM-Powered Self-Healing** — The attached Watcher daemon natively protects your system. If a new hire crashes the backend config, the script summons an LLM (Claude/Gemini) to live-patch the bug and safely reload.
 
 ## 📁 Project Structure
 
