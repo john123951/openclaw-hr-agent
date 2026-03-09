@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "openclaw/hr-agent/agent-provisioning/provision.schema.json",
+  "title": "Agent Provision Payload",
+  "type": "object",
+  "required": [
+    "agent_id",
+    "agent_name",
+    "agent_role",
+    "safety_rules",
+    "soul_beliefs"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 32,
+      "pattern": "^[a-z][a-z0-9-]{1,31}$",
+      "description": "Agent id used in workspace path and OpenClaw config."
+    },
+    "agent_name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 80
+    },
+    "agent_role": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 120
+    },
+    "work_schedule": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "agent_tools_desc": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "knowledge_focus": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "safety_rules": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 4000
+    },
+    "soul_beliefs": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 2000
+    },
+    "custom_sections": {
+      "type": "object",
+      "properties": {
+        "agents_appendix_md": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "soul_appendix_md": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "bootstrap_appendix_md": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

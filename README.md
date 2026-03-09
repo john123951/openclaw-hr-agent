@@ -6,7 +6,7 @@
 
 让您的专属 **HR 总监** 与 **IT 极客** 通过自然对话，全自动为您招募 AI 员工、配置系统权限，并一键打通飞书/TG等渠道。
 
-## 🚀 极速一键装载
+## 🚀 一键安装
 
 最简单的安装方式，直接对你的 OpenClaw 助手说：
 > "帮我安装这个OpenClaw人事总监：https://github.com/john123951/openclaw-hr-agent"
@@ -32,7 +32,7 @@ curl -sL https://raw.githubusercontent.com/john123951/openclaw-hr-agent/refs/hea
 
 ---
 
-## 📁 准确的项目架构
+## 📁 项目架构
 
 ```
 openclaw-hr-agent/

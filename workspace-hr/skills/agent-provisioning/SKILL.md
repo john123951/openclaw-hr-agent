@@ -55,35 +55,36 @@ openclaw config set "agents.list[<INDEX>].tools.deny" \
   '["browser","canvas","nodes","sessions_spawn"]' --strict-json
 ```
 
-### 步骤 4：写入工作空间文件
+### 步骤 4：写入工作空间文件（参数化渲染 + 强校验）
 
-**⚠️ 绝对禁止使用 `cat > EOF` 从零手搓这些文件！**
-你必须在你的创建脚本中，严格使用 `cp` 和 `sed` 基于预设模板来生成这三个文件到 `~/.openclaw/workspace-<agentId>/`。
-（注：新版模板已内置握手异常重试逻辑，务必完整继承）
+**⚠️ 绝对禁止手搓目标文件，禁止逐行 `sed` 直替占位符。**
+LLM 在这一步只负责产出参数 JSON（payload），实际渲染和校验必须交给脚本执行。
+
+Payload 示例请参考：
+`$HOME/.openclaw/workspace-hr/skills/agent-provisioning/examples/provision-payload.example.json`
 
 ```bash
-# 生成 AGENTS.md
-cp "$HOME/.openclaw/workspace-hr/templates/new-agent/AGENTS.md.template" "${WORKSPACE}/AGENTS.md"
-sed -i '' "s/{{AGENT_NAME}}/${AGENT_NAME}/g" "${WORKSPACE}/AGENTS.md"
-sed -i '' "s/{{AGENT_ROLE}}/<岗位职责描写>/g" "${WORKSPACE}/AGENTS.md"
-sed -i '' "s/{{WORK_SCHEDULE}}/<工作时间>/g" "${WORKSPACE}/AGENTS.md"
-sed -i '' "s/{{AGENT_TOOLS_DESC}}/<工具说明>/g" "${WORKSPACE}/AGENTS.md"
-sed -i '' "s/{{KNOWLEDGE_FOCUS}}/<知识领域>/g" "${WORKSPACE}/AGENTS.md"
-sed -i '' "s/{{SAFETY_RULES}}/<安全红线>/g" "${WORKSPACE}/AGENTS.md"
+PAYLOAD="/tmp/provision-payload.json"
+WORKSPACE="$HOME/.openclaw/workspace-<agentId>"
 
-# 生成 SOUL.md
-cp "$HOME/.openclaw/workspace-hr/templates/new-agent/SOUL.md.template" "${WORKSPACE}/SOUL.md"
-sed -i '' "s/{{AGENT_NAME}}/${AGENT_NAME}/g" "${WORKSPACE}/SOUL.md"
-sed -i '' "s/{{AGENT_ROLE}}/<岗位职责描写>/g" "${WORKSPACE}/SOUL.md"
-sed -i '' "s/{{SOUL_BELIEFS}}/<核心信念>/g" "${WORKSPACE}/SOUL.md"
+# 1) 参数校验（失败即中止）
+$HOME/.openclaw/workspace-hr/skills/agent-provisioning/scripts/hr-provision-validate.sh \
+  --payload "$PAYLOAD" \
+  --schema "$HOME/.openclaw/workspace-hr/skills/agent-provisioning/schema/provision.schema.json"
 
-# 生成 BOOTSTRAP.md (至关重要，此文件关乎入职拜码头)
-cp "$HOME/.openclaw/workspace-hr/templates/new-agent/BOOTSTRAP.md.template" "${WORKSPACE}/BOOTSTRAP.md"
-sed -i '' "s/{{AGENT_ID}}/${AGENT_ID}/g" "${WORKSPACE}/BOOTSTRAP.md"
-sed -i '' "s/{{AGENT_NAME}}/${AGENT_NAME}/g" "${WORKSPACE}/BOOTSTRAP.md"
-sed -i '' "s/{{AGENT_ROLE}}/<岗位职责描写>/g" "${WORKSPACE}/BOOTSTRAP.md"
-sed -i '' "s/{{SAFETY_RULES}}/<安全红线>/g" "${WORKSPACE}/BOOTSTRAP.md"
+# 2) 模板渲染（生成 AGENTS.md / SOUL.md / BOOTSTRAP.md）
+$HOME/.openclaw/workspace-hr/skills/agent-provisioning/scripts/hr-provision-render.sh \
+  --payload "$PAYLOAD" \
+  --workspace "$WORKSPACE" \
+  --template-dir "$HOME/.openclaw/workspace-hr/templates/new-agent"
+
+# 3) 渲染结果校验（失败即中止）
+$HOME/.openclaw/workspace-hr/skills/agent-provisioning/scripts/hr-provision-check-output.sh \
+  --workspace "$WORKSPACE" \
+  --agent-id "<agentId>"
 ```
+
+`payload` 支持 `custom_sections` 扩展区块（`agents_appendix_md` / `soul_appendix_md` / `bootstrap_appendix_md`），用于在不破坏固定骨架的前提下增加个性化内容。
 
 ### 步骤 5：通道绑定与体验设置（如适用）
 

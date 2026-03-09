@@ -34,7 +34,7 @@ curl -sL https://raw.githubusercontent.com/john123951/openclaw-hr-agent/refs/hea
 
 ---
 
-## 📁 Accurate Architecture Layout
+## 📁 Architecture Layout
 
 ```
 openclaw-hr-agent/

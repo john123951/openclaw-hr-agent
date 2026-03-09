@@ -8,12 +8,16 @@
 #   - 若没有提供 GROUP_ID，只绑定基础 telegram:default 渠道（无 peer 过滤）
 #   - requireMention 必须在脚本中 100% 显式配置，不允许留空由系统自行决定
 
-set -e
+set -euo pipefail
 
 AGENT_ID=""
 GROUP_ID=""
 REQ_MENTION="false"
 REPLY_MODE="all"
+
+json_from_noisy_stdout() {
+    awk 'BEGIN{emit=0} /^[[:space:]]*\{/{emit=1} emit {print}'
+}
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -46,9 +50,31 @@ if [ -z "$AGENT_ID" ]; then
     exit 1
 fi
 
+if [ "$REQ_MENTION" != "true" ] && [ "$REQ_MENTION" != "false" ]; then
+    echo "[Telegram Binding Helper] ❌ --require-mention 只允许 true / false"
+    exit 1
+fi
+
+if [ "$REPLY_MODE" != "all" ] && [ "$REPLY_MODE" != "first" ] && [ "$REPLY_MODE" != "off" ]; then
+    echo "[Telegram Binding Helper] ❌ --reply-to 只允许 all / first / off"
+    exit 1
+fi
+
 if [ -z "$GROUP_ID" ]; then
     echo "[Telegram Binding Helper] ℹ️ 未提供群组 ID，跳过渠道绑定。新员工将仅在后台待命。"
     exit 0
+fi
+
+if [[ ! "$GROUP_ID" =~ ^-?[0-9]+$ ]] && [[ ! "$GROUP_ID" =~ ^@ ]]; then
+    echo "[Telegram Binding Helper] ❌ Telegram 群组 ID / target 格式不合法: $GROUP_ID"
+    exit 1
+fi
+
+CHANNELS_RAW="$(openclaw channels list --json 2>/dev/null || true)"
+CHANNELS_JSON="$(printf '%s\n' "$CHANNELS_RAW" | json_from_noisy_stdout)"
+if [ -z "$CHANNELS_JSON" ] || ! printf '%s\n' "$CHANNELS_JSON" | jq -e '(.chat.telegram // []) | index("default") != null' >/dev/null; then
+    echo "[Telegram Binding Helper] ❌ 未检测到 telegram:default 渠道账号，请先完成 Telegram 登录 / 配置。"
+    exit 1
 fi
 
 echo "[Telegram Binding Helper] 开始为 Agent '$AGENT_ID' 绑定 Telegram 渠道..."

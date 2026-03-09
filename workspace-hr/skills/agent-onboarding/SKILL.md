@@ -93,6 +93,13 @@ HR Agent 必须主动跟进新员工的三次“拜码头”动作：
 1. **检查 HR 频道**：等待新员工给你发送“入职自检完成”的消息。
 2. **追问进度**：如果新员工迟迟未发，你可以主动 `sessions_send` 问他：
    `HR → 新 Agent: "你好！我是 HR。你是否已经看完了公司运转指南，并向老板和 IT 大牛打过招呼了？"`
+3. **用脚本做最终验收**：在向老板汇报“已入职”前，必须运行：
+
+```bash
+$HOME/.openclaw/workspace-hr/skills/agent-onboarding/scripts/hr-verify-handshake.sh --agent-id <agentId>
+```
+
+若脚本失败，说明握手仍未闭环。此时 HR 只能向老板汇报“档案已建好，入职待完成”，不能汇报“已入职”。
 
 检查新 agent 是否：
 1. 正常响应

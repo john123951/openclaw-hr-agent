@@ -118,3 +118,7 @@ openclaw agents list --bindings
 # 重启完成后，可使用此命令检查健康状态（可选）：
 openclaw channels status --probe
 ```
+
+**补充纪律：**
+- 群组绑定脚本只负责路由与群设置，不负责替 HR / IT 做外部汇报。
+- 任何系统内部激活、握手探测、agent-to-agent 心跳，都**不得**使用外部渠道投递，除非显式带上目标 `chatId` / `reply-to`。

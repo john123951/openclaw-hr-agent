@@ -63,6 +63,8 @@
 
 {{SAFETY_RULES}}
 
+{{AGENTS_APPENDIX_MD}}
+
 ## 记忆
 
 - 重要事项写入 `memory/YYYY-MM-DD.md`

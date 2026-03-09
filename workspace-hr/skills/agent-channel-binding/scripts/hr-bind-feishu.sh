@@ -8,12 +8,16 @@
 #   - 若没有提供 GROUP_ID，只绑定基础 feishu:default 渠道（无 peer 过滤）
 #   - requireMention 必须在脚本中 100% 显式配置，不允许留空由系统自行决定
 
-set -e
+set -euo pipefail
 
 AGENT_ID=""
 GROUP_ID=""
 REQ_MENTION="false"
 REPLY_MODE="all"
+
+json_from_noisy_stdout() {
+    awk 'BEGIN{emit=0} /^[[:space:]]*\{/{emit=1} emit {print}'
+}
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -46,9 +50,31 @@ if [ -z "$AGENT_ID" ]; then
     exit 1
 fi
 
+if [ "$REQ_MENTION" != "true" ] && [ "$REQ_MENTION" != "false" ]; then
+    echo "[Binding Helper] ❌ --require-mention 只允许 true / false"
+    exit 1
+fi
+
+if [ "$REPLY_MODE" != "all" ] && [ "$REPLY_MODE" != "first" ] && [ "$REPLY_MODE" != "off" ]; then
+    echo "[Binding Helper] ❌ --reply-to 只允许 all / first / off"
+    exit 1
+fi
+
 if [ -z "$GROUP_ID" ]; then
     echo "[Binding Helper] ℹ️ 未提供群组 ID，跳过渠道绑定。新员工将仅在后台待命。"
     exit 0
+fi
+
+if [[ ! "$GROUP_ID" =~ ^oc_[A-Za-z0-9]+$ ]]; then
+    echo "[Binding Helper] ❌ 飞书群组 ID 格式不合法: $GROUP_ID"
+    exit 1
+fi
+
+CHANNELS_RAW="$(openclaw channels list --json 2>/dev/null || true)"
+CHANNELS_JSON="$(printf '%s\n' "$CHANNELS_RAW" | json_from_noisy_stdout)"
+if [ -z "$CHANNELS_JSON" ] || ! printf '%s\n' "$CHANNELS_JSON" | jq -e '(.chat.feishu // []) | index("default") != null' >/dev/null; then
+    echo "[Binding Helper] ❌ 未检测到 feishu:default 渠道账号，请先完成飞书登录 / 配置。"
+    exit 1
 fi
 
 echo "[Binding Helper] 开始为 Agent '$AGENT_ID' 绑定飞书渠道..."
@@ -122,7 +148,11 @@ if [ -n "$GROUP_ID" ]; then
               -H "Content-Type: application/json" \
               -d "{\"name\":\"$AGENT_NAME\"}" > /dev/null 2>&1 || true
             echo "[Binding Helper] ✅ 群改名尝试完成。"
+        else
+            echo "[Binding Helper] ⚠️ 无法获取 tenant_access_token，跳过自动改群名。"
         fi
+    else
+        echo "[Binding Helper] ⚠️ 未读取到飞书 App 凭据，跳过自动改群名。"
     fi
 fi
 
