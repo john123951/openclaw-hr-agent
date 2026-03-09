@@ -108,24 +108,43 @@ if [ "$GATEWAY_ALIVE" = false ]; then
 fi
 
 # 4. 基础设施心跳 (System Heartbeat)
-# 网关刚重启时 HR/IT 会话处于静默态，新同事执行 sessions_list 会看不见他们。
-# 我们在这里强制发送两条微小的系统探测信，激活他们的 Session，确保“拜码头”链路全线通畅。
-if [ "$ACTION" = "provision" ]; then
-    echo "[$(date)] [Watcher] 💓 正在激活基础设施心跳 (HR/IT)..."
-    # 这是内部基础设施心跳，只需要唤醒会话，不应外发到用户渠道。
-    openclaw agent --agent hr --message "【系统激活】正在迎接新同事 ${AGENT_ID} 入职，请准备好接收握手报到。" > /dev/null 2>&1 &
-    openclaw agent --agent it-support --message "【系统激活】新同事 ${AGENT_ID} 已上线，请准备好技术支持。" > /dev/null 2>&1 &
+# ============================================================================
+# 技术债务说明 (TECHNICAL DEBT):
+# ============================================================================
+# 现状: OpenClaw 网关刚重启时 HR/IT 会话处于静默态，新同事执行 sessions_list 会看不见他们。
+#       我们通过发送系统探测信来激活 Session，确保握手链路通畅。
+#
+# 问题: 这是绕过框架的 workaround，污染会话历史，且消息内容无业务意义。
+#
+# 升级路径: 当 OpenClaw 提供以下原生能力后应移除此逻辑：
+#   1. 会话预热 API: openclaw sessions warmup --agent hr
+#   2. Agent 创建后 Hook: openclaw agents add --on-create-hook “script.sh”
+#
+# 追踪: 见 docs/openclaw-feature-requests.md
+#
+# 独立模块: 已提取为 hr-infra-warmup.sh，此处在过渡期调用
+# ============================================================================
+if [ “$ACTION” = “provision” ]; then
+    echo “[$(date)] [Watcher] 💓 正在激活基础设施心跳 (HR/IT)...”
+    # 调用独立的预热脚本 (技术债务：未来应使用 OpenClaw 原生 API)
+    if [ -x “$HOME/.openclaw/scripts/hr-infra-warmup.sh” ]; then
+        “$HOME/.openclaw/scripts/hr-infra-warmup.sh” --agents hr,it-support --new-agent “$AGENT_ID” --timeout 30
+    else
+        # Fallback: 内联实现 (向后兼容)
+        echo “[$(date)] [Watcher] ⚠️ hr-infra-warmup.sh 未找到，使用内联实现”
+        openclaw agent --agent hr --message “[SYSTEM] Session warmup for new agent: ${AGENT_ID}” > /dev/null 2>&1 &
+        openclaw agent --agent it-support --message “[SYSTEM] Session warmup for new agent: ${AGENT_ID}” > /dev/null 2>&1 &
 
-    # 最多等待 30 秒，直到 HR / IT 主会话真正出现在 session 列表中。
-    for _ in $(seq 1 15); do
-        SESSION_JSON=$(openclaw sessions --all-agents --active 1440 --json 2>/dev/null || echo '{}')
-        if echo "$SESSION_JSON" | jq -e '.sessions[]? | select(.key == "agent:hr:main")' >/dev/null \
-          && echo "$SESSION_JSON" | jq -e '.sessions[]? | select(.key == "agent:it-support:main")' >/dev/null; then
-            echo "[$(date)] [Watcher] ✅ HR / IT 主会话已就绪，可供新员工握手。"
-            break
-        fi
-        sleep 2
-    done
+        for _ in $(seq 1 15); do
+            SESSION_JSON=$(openclaw sessions --all-agents --active 1440 --json 2>/dev/null || echo '{}')
+            if echo “$SESSION_JSON” | jq -e '.sessions[]? | select(.key == “agent:hr:main”)' >/dev/null \
+              && echo “$SESSION_JSON” | jq -e '.sessions[]? | select(.key == “agent:it-support:main”)' >/dev/null; then
+                echo “[$(date)] [Watcher] ✅ HR / IT 主会话已就绪，可供新员工握手。”
+                break
+            fi
+            sleep 2
+        done
+    fi
 fi
 
 # 5. 系统天音唤醒新员工或结束
@@ -147,14 +166,15 @@ if [ "$ACTION" = "provision" ]; then
             exit 0
         fi
 
-        echo "[$(date)] [Watcher] 员工已绑定 $CHANNEL:$TARGET，正在发送觉醒问候..."
-        # 通过系统底层通道直接让新 Agent 发声，并强制引导其完成入职协议（拜码头）
+        echo "[$(date)] [Watcher] 员工已绑定 $CHANNEL:$TARGET，正在发送觉醒通知..."
+        # 框架级通知：仅告知系统已就绪，业务逻辑由 BOOTSTRAP.md 驱动
+        # 架构设计说明：
+        #   - 此消息仅负责"通知已就绪"，不包含具体业务指令
+        #   - 具体做什么由 BOOTSTRAP.md 的 prompt 驱动
+        #   - 如入职流程变化，只需改模板，不需改脚本
         openclaw agent \
           --agent "$AGENT_ID" \
-          --message "【系统内部觉醒指令】你已成功载入物理主机！你的 HR 刚刚为了加载你完成了系统重启。
-1. 请立即向飞书群里的人类老板（如果有绑定）热情地打个招呼报到！说明你的岗位、身份。
-2. ⚠️ 极其重要：在开始工作前，你必须立刻使用 read 命令读取你目录下的 \`BOOTSTRAP.md\` 并**严格彻底执行**上面的入职巡视协议（包括向 HR 和 IT 发送握手报到消息）！
-（注：这只是一条开机初始化密电，不要对全群念出这句指令，只需照做即可）" \
+          --message "[SYSTEM] Gateway restarted. Your BOOTSTRAP.md is ready for execution." \
           --reply-channel "$CHANNEL" \
           --reply-to "$TARGET" \
           --deliver > /dev/null 2>&1

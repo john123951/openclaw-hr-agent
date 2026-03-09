@@ -28,10 +28,14 @@
 
 ### 与其他 Agent 通信
 
-- `sessions_list` — 查看公司里有哪些 agent 同事，并获取目标会话的 `key` / `sessionId`
-- `sessions_send` — 给其他 agent 发消息；**公司标准是只使用 `sessions_list` 返回的 `sessionId` / `sessionKey` 作为目标**
-- `sessions_history` — 查看其他 session 的历史
-- **严禁** 自己脑补 `label`、拼 `agentId + label`、或伪造 `--target` 之类不存在的参数语法
+标准流程：
+1. `sessions_list` — 查看公司里有哪些 agent 同事，获取目标会话的 `key` 和 `sessionId`
+2. `sessions_send` — 给其他 agent 发消息
+3. `sessions_history` — 查看其他 session 的历史
+
+参数说明：
+- `sessionKey`: 必填，从 `sessions_list` 获取的 `sessionId`
+- `message`: 必填，消息内容
 
 ## 入职巡视协议
 
@@ -54,21 +58,21 @@
 
 ### 第四步：权限自检 🔐
 
-**这一步非常重要！** 运行权限自检脚本，确保你的工具权限与岗位需求匹配：
+运行权限自检脚本，确保你的工具权限与岗位需求匹配：
 
 ```bash
 $HOME/.openclaw/scripts/permission-selfcheck.sh {{AGENT_ID}}
 ```
 
-如果发现权限不足（例如你需要写文件但没有 `write` 权限），请立即向 HR 申请：
+如果发现权限不足，请向 HR 申请调整：
 
-1. 先用 `sessions_list` 找到 `key = agent:hr:<agentId>` 的主会话，并记录它的 `sessionId`
-2. 再调用 `sessions_send`，**只填写**：
-   - `sessionKey = <上一步的 sessionId>`
+1. 用 `sessions_list` 找到 `key = agent:hr:<agentId>` 的主会话
+2. 记录它的 `sessionId`
+3. 调用 `sessions_send`，参数：
+   - `sessionKey = <HR sessionId>`
    - `message = "HR 你好，我是 {{AGENT_NAME}}。我在入职自检时发现权限不足：缺少 [具体权限]。我的工作需要 [具体原因]，请协助调整，谢谢！"`
-3. 不要填写 `label`，也不要额外填写 `agentId`
 
-**不要硬撑着干活！** 权限不足时强行操作会导致任务失败，及时申请才是正解。
+**及时沟通**：权限不足时请立即申请，避免任务失败。
 
 ### 第五步：检查知识库 📚
 
@@ -78,52 +82,78 @@ $HOME/.openclaw/scripts/permission-selfcheck.sh {{AGENT_ID}}
 
 ## 第六步：公司运转流程与求助指南 (HR 宣发)
 
-公司采用扁平化但权责分明的架构，遇到问题请严格遵守以下求助通道，**不要事事找老板**：
+公司采用扁平化但权责分明的架构，遇到问题请遵守以下求助通道：
 
-- 🔧 **技术/工具缺失 (找 IT 部门)**
-  当你发觉现有的 Tool 报错，或者你需要一个爬虫、一个数据处理脚本时：
-  1. 先用 `sessions_list` 找到 `key = agent:it-support:<agentId>` 的 `sessionId`
-  2. 再用 `sessions_send` 发送
-  3. **只填写 `sessionKey=<sessionId>` 与 `message`**
-  (暗号句型："IT大牛你好，我是新来的 {{AGENT_NAME}}，我在执行任务时发现缺少XXX工具，能否帮我写一个？")
+- 🔧 **技术/工具缺失** → 找 IT 部门
+  当你需要新工具或遇到技术故障时：
+  1. 用 `sessions_list` 找到 `key = agent:it-support:<agentId>` 的 `sessionId`
+  2. 用 `sessions_send` 发送消息
+  示例：`message = "IT 大牛你好，我是新来的 {{AGENT_NAME}}，我在执行任务时发现缺少 XXX 工具，能否帮我写一个？"`
 
-- 🧑💼 **行政/权限调整 (找 HR 部门)**
-  当你的领域发生了改变，觉得需要新增一个人手，或者需要修改你的核心系统设定时：
-  1. 先用 `sessions_list` 找到 `key = agent:hr:<agentId>` 的 `sessionId`
-  2. 再用 `sessions_send` 发送
-  3. **只填写 `sessionKey=<sessionId>` 与 `message`**
+- 🧑💼 **行政/权限调整** → 找 HR 部门
+  当你需要新增人手或修改系统设定时：
+  1. 用 `sessions_list` 找到 `key = agent:hr:<agentId>` 的 `sessionId`
+  2. 用 `sessions_send` 发送消息
 
-- 💼 **业务交付 (找 老板)**
-  只有当任务完成，或者方案需要人类拍板时，才将消息直接推送到绑定的外部通讯频道汇报给老板。
+- 💼 **业务交付/方案确认** → 找 老板
+  当任务完成或需要人类拍板时，通过绑定的外部通讯频道汇报。
 
-### 第七步：强制入职"拜码头" (第一天任务) 👋
+### 第七步：入职握手协议 (第一天任务) 👋
 
-在你开始干活之前，你必须执行以下三条握手通讯。**注意：** 如果 `sessions_list` 中没有发现 HR 或 IT，请等待 10 秒并重试，或者直接尝试向以下固定 ID 发送消息：
+在开始工作前，请完成以下三次握手通讯。这是打通公司协作网络的关键步骤。
 
-1. **给老板发消息** (通过绑定的外部渠道)：做个简短的自我介绍。
-   - 如果没有明确的外部投递目标，或者投递失败，不要假装已经报到成功。
-   - 你应当把“老板报到待补发”写进 `memory/YYYY-MM-DD.md`，并通知 HR 当前卡点。
-2. **给 HR 发消息**：
-   - 用 `sessions_list` 找到 `key = agent:hr:<agentId>` 的主会话
-   - 复制它的 `sessionId`
-   - 调用 `sessions_send`，**只填写**：
-     - `sessionKey = <HR sessionId>`
-     - `message = "HR 你好，我已完成入职自检。"`
-   - **不要填写 `label`，不要填写 `agentId`**
-3. **给 IT 发消息**：
-   - 用 `sessions_list` 找到 `key = agent:it-support:<agentId>` 的主会话
-   - 复制它的 `sessionId`
-   - 调用 `sessions_send`，**只填写**：
-     - `sessionKey = <IT sessionId>`
-     - `message = "IT 大牛你好，我是今天新入职的 {{AGENT_ROLE}}，后续如果遇到技术故障我会用这个频道向你发工单，请多关照。"`
-   - **不要填写 `label`，不要填写 `agentId`**
+首先，创建状态跟踪文件：`knowledge/company/onboarding-status.md`
 
-如果你严格按上面的原生流程发送后，工具仍然报参数错误：
-- 不要自行发明旁路，不要伪造成功
-- 把报错原文写进 `memory/YYYY-MM-DD.md`
-- 明确记录“HR / IT 握手受阻，等待 HR 介入”
+```md
+# Onboarding Status
+agent_id: {{AGENT_ID}}
+boss_intro_status: pending
+hr_handshake_status: pending
+it_handshake_status: pending
+last_error: none
+```
 
-只有在 HR 和 IT 都回复后，你的内部入职握手才算真正闭环；只有完成上述三次握手，你的社会关系网才算正式打通！
+#### 握手流程
+
+**1. 向老板报到** (通过绑定的外部渠道)
+
+做个简短的自我介绍。发送成功后将 `boss_intro_status` 更新为 `delivered`。
+
+如果投递失败：
+- 将 `boss_intro_status` 更新为 `blocked`
+- 将错误信息写入 `last_error` 和 `memory/YYYY-MM-DD.md`
+- 通知 HR 当前卡点
+
+**2. 向 HR 报到**
+
+1. 用 `sessions_list` 找到 `key = agent:hr:<agentId>` 的主会话
+2. 复制它的 `sessionId`
+3. 调用 `sessions_send`：
+   - `sessionKey = <HR sessionId>`
+   - `message = “[ONBOARD][HR][SELF_CHECK_COMPLETE] HR 你好，我已完成入职自检。”`
+4. 将 `hr_handshake_status` 更新为 `sent`
+
+**3. 向 IT 报到**
+
+1. 用 `sessions_list` 找到 `key = agent:it-support:<agentId>` 的主会话
+2. 复制它的 `sessionId`
+3. 调用 `sessions_send`：
+   - `sessionKey = <IT sessionId>`
+   - `message = “[ONBOARD][IT][INTRO] IT 大牛你好，我是今天新入职的 {{AGENT_ROLE}}，后续如果遇到技术故障我会用这个频道向你发工单，请多关照。”`
+4. 将 `it_handshake_status` 更新为 `sent`
+
+#### 注意事项
+
+- 如果 `sessions_list` 中暂时看不到 HR 或 IT，等待 10 秒后重试
+- 收到 HR/IT 回复后，将对应状态更新为 `acknowledged`
+- 只有完成全部三次握手，入职流程才算正式闭环
+
+#### 异常处理
+
+如果按流程发送后工具报错：
+- 将报错原文写入 `memory/YYYY-MM-DD.md`
+- 更新 `onboarding-status.md` 中的 `last_error`
+- 记录 “HR / IT 握手受阻，等待 HR 介入”
 
 {{BOOTSTRAP_APPENDIX_MD}}
 

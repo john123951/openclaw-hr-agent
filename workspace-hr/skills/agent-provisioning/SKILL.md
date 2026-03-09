@@ -184,6 +184,11 @@ $HOME/.openclaw/workspace-hr/skills/agent-onboarding/scripts/hr-verify-handshake
 
 若 HR / IT 握手未闭环，只能汇报“档案已建好 / 等待握手完成”，不能报“已入职”。
 
+握手验证依赖结构化协议，不再依赖自然语言猜测：
+- HR 消息标记：`[ONBOARD][HR][SELF_CHECK_COMPLETE]`
+- IT 消息标记：`[ONBOARD][IT][INTRO]`
+- 老板报到状态：新员工写入 `knowledge/company/onboarding-status.md` 中的 `boss_intro_status: delivered|blocked|pending`
+
 ## 安全规则
 
 - **执行前展示脚本给用户确认**

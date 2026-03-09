@@ -1,0 +1,97 @@
+# Onboarding State Machine Definition
+# 此文件定义了新员工入职的状态机，确保状态转换的合法性和可追溯性。
+#
+# 架构说明:
+#   - 状态机替代扁平文件，防止非法状态转换
+#   - 每个状态有明确的触发条件和允许的转换
+#   - 历史记录提供完整的审计追踪
+#
+# 使用方式:
+#   - HR 和新员工都应遵循此状态机进行入职流程
+#   - 状态转换必须按照定义的 transitions 进行
+#   - 不允许跳过中间状态（如 pending → acknowledged）
+
+version: 1
+agent_id: {{AGENT_ID}}
+state_machine: onboarding
+
+# 状态定义
+states:
+  created:
+    description: 初始状态，Agent 刚创建
+    transitions:
+      bootstrap_reading: reading_bootstrap
+
+  reading_bootstrap:
+    description: 正在阅读 BOOTSTRAP.md
+    transitions:
+      bootstrap_complete: handshakes_pending
+
+  handshakes_pending:
+    description: 准备开始握手流程
+    transitions:
+      boss_intro_delivered: boss_intro_done
+      hr_message_sent: hr_waiting_ack
+
+  boss_intro_done:
+    description: 已向老板报到
+    transitions:
+      hr_message_sent: hr_waiting_ack
+
+  hr_waiting_ack:
+    description: 已发送 HR 握手消息，等待回复
+    transitions:
+      hr_ack_received: hr_ack_done
+
+  hr_ack_done:
+    description: HR 已确认握手
+    transitions:
+      it_message_sent: it_waiting_ack
+
+  it_waiting_ack:
+    description: 已发送 IT 握手消息，等待回复
+    transitions:
+      it_ack_received: it_ack_done
+
+  it_ack_done:
+    description: IT 已确认握手
+    transitions:
+      all_handshakes_complete: completed
+
+  completed:
+    description: 入职完成，所有握手已闭环
+    transitions: {}  # 终态，无后续转换
+
+# 错误状态
+error_states:
+  boss_intro_blocked:
+    description: 老板报到失败
+    transitions:
+      retry: handshakes_pending
+
+  hr_handshake_failed:
+    description: HR 握手失败
+    transitions:
+      retry: handshakes_pending
+
+  it_handshake_failed:
+    description: IT 握手失败
+    transitions:
+      retry: hr_ack_done
+
+# 当前状态
+current_state: created
+
+# 状态历史 (审计追踪)
+history: []
+# 示例:
+#   - from: created
+#     to: reading_bootstrap
+#     at: "2026-03-09T10:00:00Z"
+#     trigger: bootstrap_reading
+
+# 元数据
+metadata:
+  created_at: "{{CREATED_AT}}"
+  last_updated: "{{CREATED_AT}}"
+  schema_version: "1.0"
