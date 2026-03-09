@@ -60,6 +60,11 @@ description: 苏格拉底式询问流程，帮助用户定义新 AI agent 的需
 
 用户确认后，调用 `agent-provisioning` skill 开始创建。记得把你自动决策的群聊体验选项（如 `--require-mention false`、`--reply-to all`）带入给 Provisioning。
 
+**额外硬规则：**
+- 若岗位需要 `exec`，你必须在创建前显式决定 `tools.exec.host`（推荐业务岗位默认 `gateway`）
+- 预检失败时，停止创建并向老板解释失败原因
+- Watcher 重启完成后，只有在 HR / IT 握手验证通过后，才能对老板说“已入职”
+
 ## 岗位模板参考
 
 读取 `{baseDir}/../../templates/jobs/job-profiles.json` 获取预设岗位模板。

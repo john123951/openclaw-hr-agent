@@ -38,6 +38,9 @@ fi
 
 ALLOW=$(openclaw config get "agents.list[$AGENT_INDEX].tools.allow" 2>/dev/null || echo '[]')
 DENY=$(openclaw config get "agents.list[$AGENT_INDEX].tools.deny" 2>/dev/null || echo '[]')
+EXEC_HOST=$(openclaw config get "agents.list[$AGENT_INDEX].tools.exec.host" 2>/dev/null | tail -n 1 | tr -d '"' || true)
+DEFAULT_EXEC_HOST=$(openclaw config get "agents.defaults.tools.exec.host" 2>/dev/null | tail -n 1 | tr -d '"' || true)
+SANDBOX_MODE=$(openclaw config get "agents.defaults.sandbox.mode" 2>/dev/null | tail -n 1 | tr -d '"' || true)
 WORKSPACE=$(openclaw config get "agents.list[$AGENT_INDEX].workspace" 2>/dev/null | tr -d '"' || echo "")
 WORKSPACE="${WORKSPACE/#\~/$HOME}"
 
@@ -98,6 +101,41 @@ for base in "${baselines[@]}"; do
         SUGGESTIONS+=("向 HR 申请基线权限: $base")
     fi
 done
+
+echo ""
+echo "🧭 exec 运行宿主检查..."
+HAS_EXEC=$(echo "$ALLOW" | jq --arg t "exec" 'any(. == $t)')
+EFFECTIVE_EXEC_HOST="$EXEC_HOST"
+if [ -z "$EFFECTIVE_EXEC_HOST" ]; then
+    EFFECTIVE_EXEC_HOST="$DEFAULT_EXEC_HOST"
+fi
+
+if [ "$HAS_EXEC" = "true" ]; then
+    if [ -z "$EFFECTIVE_EXEC_HOST" ]; then
+        echo "   ⚠️ exec 已授权，但未显式设置 exec host"
+        ISSUES+=("exec 已授权，但没有显式 tools.exec.host")
+        SUGGESTIONS+=("向 HR 申请为 exec 显式设置 host，推荐业务岗位使用 gateway")
+    else
+        echo "   ℹ️ 当前 exec host: $EFFECTIVE_EXEC_HOST"
+        if [ "$EFFECTIVE_EXEC_HOST" = "sandbox" ]; then
+            if [ "$SANDBOX_MODE" != "all" ] && [ "$SANDBOX_MODE" != "non-main" ]; then
+                echo "   ❌ sandbox host 与当前 sandbox.mode 不匹配"
+                ISSUES+=("exec host=sandbox，但 agents.defaults.sandbox.mode 未启用 all/non-main")
+                SUGGESTIONS+=("向 HR 申请改用 gateway exec host，或先启用 sandbox.mode=all/non-main")
+            else
+                echo "   ✅ sandbox host 与当前 sandbox.mode 匹配 ($SANDBOX_MODE)"
+            fi
+        elif [ "$EFFECTIVE_EXEC_HOST" = "gateway" ]; then
+            echo "   ✅ gateway host 已显式设置"
+        else
+            echo "   ⚠️ 未识别的 exec host: $EFFECTIVE_EXEC_HOST"
+            ISSUES+=("未知 exec host: $EFFECTIVE_EXEC_HOST")
+            SUGGESTIONS+=("向 HR 申请修复 tools.exec.host 为 gateway 或 sandbox")
+        fi
+    fi
+else
+    echo "   ℹ️ 当前岗位未授权 exec，跳过 exec host 诊断"
+fi
 
 # 工作空间写入测试
 if [ -n "$WORKSPACE" ] && [ -d "$WORKSPACE" ]; then

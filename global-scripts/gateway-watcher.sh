@@ -3,15 +3,19 @@
 # 该脚本由代理执行核心操作后分离运行，用于安全重启 Gateway 并处理报错自愈。
 # 用法: nohup $HOME/.openclaw/scripts/gateway-watcher.sh <agent-id> [action] > /tmp/watcher.log 2>&1 &
 
-set -e
+set -euo pipefail
 
 AGENT_ID=$1
 ACTION=${2:-provision}
+WORKSPACE_DIR="$HOME/.openclaw/workspace-${AGENT_ID}"
+WAKE_MARKER="$WORKSPACE_DIR/.watcher-last-wake"
 
 if [ -z "$AGENT_ID" ]; then
     echo "[$(date)] 错误: 未提供 Agent ID"
     exit 1
 fi
+
+mkdir -p "$WORKSPACE_DIR"
 
 OPENCLAW_CONFIG="$HOME/.openclaw/openclaw.json"
 OPENCLAW_BACKUP="$HOME/.openclaw/openclaw.json.hr_backup"
@@ -108,10 +112,20 @@ fi
 # 我们在这里强制发送两条微小的系统探测信，激活他们的 Session，确保“拜码头”链路全线通畅。
 if [ "$ACTION" = "provision" ]; then
     echo "[$(date)] [Watcher] 💓 正在激活基础设施心跳 (HR/IT)..."
-    openclaw agent --agent hr --message "【系统激活】正在迎接新同事 ${AGENT_ID} 入职，请准备好接收握手报到。" --deliver > /dev/null 2>&1 &
-    openclaw agent --agent it-support --message "【系统激活】新同事 ${AGENT_ID} 已上线，请准备好技术支持。" --deliver > /dev/null 2>&1 &
-    # 给心跳一点时间沉淀到会话列表
-    sleep 2
+    # 这是内部基础设施心跳，只需要唤醒会话，不应外发到用户渠道。
+    openclaw agent --agent hr --message "【系统激活】正在迎接新同事 ${AGENT_ID} 入职，请准备好接收握手报到。" > /dev/null 2>&1 &
+    openclaw agent --agent it-support --message "【系统激活】新同事 ${AGENT_ID} 已上线，请准备好技术支持。" > /dev/null 2>&1 &
+
+    # 最多等待 30 秒，直到 HR / IT 主会话真正出现在 session 列表中。
+    for _ in $(seq 1 15); do
+        SESSION_JSON=$(openclaw sessions --all-agents --active 1440 --json 2>/dev/null || echo '{}')
+        if echo "$SESSION_JSON" | jq -e '.sessions[]? | select(.key == "agent:hr:main")' >/dev/null \
+          && echo "$SESSION_JSON" | jq -e '.sessions[]? | select(.key == "agent:it-support:main")' >/dev/null; then
+            echo "[$(date)] [Watcher] ✅ HR / IT 主会话已就绪，可供新员工握手。"
+            break
+        fi
+        sleep 2
+    done
 fi
 
 # 5. 系统天音唤醒新员工或结束
@@ -126,6 +140,13 @@ if [ "$ACTION" = "provision" ]; then
     TARGET=$(echo "$BIND_INFO" | awk '{print $2}')
     
     if [ -n "$CHANNEL" ] && [ -n "$TARGET" ]; then
+        WAKE_SIGNATURE="${ACTION}|${CHANNEL}|${TARGET}"
+        if [ -f "$WAKE_MARKER" ] && [ "$(cat "$WAKE_MARKER" 2>/dev/null || true)" = "$WAKE_SIGNATURE" ]; then
+            echo "[$(date)] [Watcher] ℹ️ 检测到相同渠道与目标的唤醒消息已发送过，跳过重复外发。"
+            rm "$OPENCLAW_BACKUP" || true
+            exit 0
+        fi
+
         echo "[$(date)] [Watcher] 员工已绑定 $CHANNEL:$TARGET，正在发送觉醒问候..."
         # 通过系统底层通道直接让新 Agent 发声，并强制引导其完成入职协议（拜码头）
         openclaw agent \
@@ -137,6 +158,8 @@ if [ "$ACTION" = "provision" ]; then
           --reply-channel "$CHANNEL" \
           --reply-to "$TARGET" \
           --deliver > /dev/null 2>&1
+
+        printf '%s' "$WAKE_SIGNATURE" > "$WAKE_MARKER"
     else
         echo "[$(date)] [Watcher] ⚠️ 员工未绑定特定群组，跳过觉醒问候。"
     fi

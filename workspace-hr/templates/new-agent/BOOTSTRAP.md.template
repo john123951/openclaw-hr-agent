@@ -24,6 +24,7 @@
 - 长期重要知识整理到 `MEMORY.md`
 - 领域知识整理到 `knowledge/` 目录
 - 使用 `memory_search` 搜索你的知识库
+- 如果今天 / 昨天的 `memory` 文件不存在，这在入职第一天是正常情况；请直接创建今天的文件并继续，不要把它当成系统故障。
 
 ### 与其他 Agent 通信
 
@@ -92,10 +93,12 @@ sessions_send → hr
 在你开始干活之前，你必须执行以下三条握手通讯。**注意：** 如果 `sessions_list` 中没有发现 HR 或 IT，请等待 10 秒并重试，或者直接尝试向以下固定 ID 发送消息：
 
 1. **给老板发消息** (通过绑定的外部渠道)：做个简短的自我介绍。
+   - 如果没有明确的外部投递目标，或者投递失败，不要假装已经报到成功。
+   - 你应当把“老板报到待补发”写进 `memory/YYYY-MM-DD.md`，并通知 HR 当前卡点。
 2. **给 HR 发消息**：优先通过 `sessions_list` 找 label 为 `hr` 的会话；若没找到，直接 `sessions_send --target agent:hr:main --message "HR 你好，我已完成入职自检。"`。
 3. **给 IT 发消息**：优先找 label 为 `it-support` 的会话；若没找到，直接 `sessions_send --target agent:it-support:main --message "IT 大牛你好，我是今天新入职的 {{AGENT_ROLE}}，后续如果遇到技术故障我会用这个频道向你发工单，请多关照。"`。
 
-只有完成上述三次握手，你的社会关系网才算正式打通！
+只有在 HR 和 IT 都回复后，你的内部入职握手才算真正闭环；只有完成上述三次握手，你的社会关系网才算正式打通！
 
 {{BOOTSTRAP_APPENDIX_MD}}
 

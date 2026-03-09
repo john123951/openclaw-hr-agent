@@ -38,6 +38,11 @@
       "minLength": 1,
       "maxLength": 2000
     },
+    "exec_host_note": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 200
+    },
     "knowledge_focus": {
       "type": "string",
       "minLength": 1,

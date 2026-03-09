@@ -10,6 +10,27 @@ metadata: {"openclaw": {"requires": {"bins": ["openclaw"]}}}
 
 在招聘方案确认后，使用 OpenClaw CLI 命令创建新 agent。**绝不手动编辑 openclaw.json**。
 
+在真正执行 `openclaw agents add` 之前，先做一轮**预检**；在配置写入完成后，再做一轮**实际配置校验**。只有两轮都通过，才允许进入 Watcher 重启阶段。
+
+### 0. 预检（失败即中止）
+
+```bash
+$HOME/.openclaw/workspace-hr/skills/agent-provisioning/scripts/hr-provision-preflight.sh \
+  --model <model> \
+  --allow-tools <tool1,tool2,...> \
+  --deny-tools <tool1,tool2,...> \
+  --channel <feishu|telegram|discord> \
+  --group-id <GROUP_ID> \
+  --exec-host <gateway|sandbox>
+```
+
+重点检查：
+- 模型是否真的存在于 `openclaw models status` 的 `allowed` 列表
+- 生命线权限是否齐全
+- `exec` 是否显式设置宿主（`gateway` / `sandbox`）
+- 若用飞书 / Telegram 群绑定，是否提供了明确群组 ID
+- HR / IT 会话是否已可见（若暂不可见，会提示由 Watcher 重启后激活）
+
 ## 创建流程
 
 ### 步骤 1：创建 Agent
@@ -43,6 +64,10 @@ openclaw config get agents.list
 ```bash
 # 设置模型
 openclaw config set "agents.list[<INDEX>].model" "<model>"
+
+# 若 allow 中包含 exec，必须显式设置 exec host。
+# 对大多数业务员工，推荐优先使用 gateway，除非你确认 sandbox runtime 已启用并健康。
+openclaw config set "agents.list[<INDEX>].tools.exec.host" '"gateway"' --strict-json
 
 # 设置工具权限（根据岗位模板）
 # ⚠️ 基线权限必须始终包含！
@@ -118,7 +143,19 @@ $HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegr
 
 ```bash
 openclaw config validate
+
+$HOME/.openclaw/workspace-hr/skills/agent-provisioning/scripts/hr-provision-verify-agent.sh \
+  --agent-id <agentId> \
+  --allow-tools <tool1,tool2,...> \
+  --deny-tools <tool1,tool2,...> \
+  --exec-host <gateway|sandbox> \
+  --channel <feishu|telegram|discord> \
+  --group-id <GROUP_ID> \
+  --require-mention <true|false> \
+  --reply-to <all|first|off>
 ```
+
+**注意：** `operations` 等运营岗位不能只“参考模板”，必须真的把模板里的生命线权限落到最终配置上，并通过上述校验脚本核对。
 
 ### 步骤 7：通过 Watcher Daemon 安全重启 Gateway（关键）
 
@@ -126,16 +163,26 @@ Gateway 重启后你的进程会被杀掉，系统将由 Watcher 接管。
 新版 Watcher 将自动执行 **“基础设施心跳” (Infrastructure Heartbeat)**，强制苏醒 HR 和 IT，确保新员工在执行 `BOOTSTRAP.md` 时能立即在会话列表中查看到同事。
 
 ```bash
-nohup $HOME/.openclaw/global-scripts/gateway-watcher.sh <agentId> provision > /tmp/watcher.log 2>&1 &
+nohup $HOME/.openclaw/scripts/gateway-watcher.sh <agentId> provision > /tmp/watcher.log 2>&1 &
 ```
 
-执行后，立即回复用户："✅ 新同事 <Agent名称> 的档案已建好！系统正由 Watcher 接管，将在后台进行安全校验与重启... 苏醒后新同事会亲自向您报告！"
+执行后，立即回复用户："✅ 新同事 <Agent名称> 的档案已建好！系统正由 Watcher 接管，将在后台进行安全校验、重启与入职握手验证。握手闭环完成后，我再向您确认他已正式入职。"
 
 ### 步骤 8：验证
 
 ```bash
 openclaw agents list --bindings
 ```
+
+### 步骤 9：等待入职握手验证（关键）
+
+在向老板报“已入职”之前，HR 必须等待并运行：
+
+```bash
+$HOME/.openclaw/workspace-hr/skills/agent-onboarding/scripts/hr-verify-handshake.sh --agent-id <agentId>
+```
+
+若 HR / IT 握手未闭环，只能汇报“档案已建好 / 等待握手完成”，不能报“已入职”。
 
 ## 安全规则
 

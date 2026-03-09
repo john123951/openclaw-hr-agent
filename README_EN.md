@@ -29,7 +29,7 @@ curl -sL https://raw.githubusercontent.com/john123951/openclaw-hr-agent/refs/hea
 - **Socratic Rapid Recruitment** — No more rigid 10-question surveys. The HR smartly infers your needs, often finalizing a new role architecture in just 3 conversational turns.
 - **Dynamic IT Tool Smith** — If your Copywriter AI needs a specific web scraper, you don't write code. Just tell them to escalate to the IT Department (`it-support`), who will write, package, and install it as a system-wide Skill dynamically.
 - **Automated Channel Binding** — Effortlessly deploy your new hires directly to Feishu (Lark), Telegram, or Discord. It even handles advanced API syncs like renaming Feishu groups.
-- **Sociological Onboarding** — Hires aren't just "dropped in". They arrive with an onboarding protocol, get to know their boss, learn the company structure, and dynamically shake hands with IT peers.
+- **Sociological Onboarding** — Hires aren't just "dropped in". They arrive with an onboarding protocol, get to know their boss, and must complete verified HR / IT handshakes before HR marks them fully onboarded.
 - **LLM-Powered Self-Healing** — The attached OS Watcher daemon physically protects your gateway. If a new agent crashes the backend config, the script summons an LLM (Claude/Gemini) to live-patch the JSON bug and safely reboot.
 
 ---
@@ -41,7 +41,7 @@ openclaw-hr-agent/
 ├── install.sh                  # The unified one-click deployment gateway
 ├── uninstall.sh                # The rigorous physical sweeper
 ├── global-scripts/             # Baseline background daemons
-│   └── gateway-watcher.sh      # The Restart/Self-healing autonomous loop
+│   └── gateway-watcher.sh      # Deployed to ~/.openclaw/scripts/ for restart/self-healing
 ├── global-skills/              # Arsenal of extreme skills mapped at root level
 │   └── openclaw-mastery/       # Grants agents control over OpenClaw system paths
 ├── workspace-hr/               # Isolated workspace for the HR Director

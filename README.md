@@ -27,7 +27,7 @@ curl -sL https://raw.githubusercontent.com/john123951/openclaw-hr-agent/refs/hea
 - **苏格拉底式极速招聘** — 抛弃“连环十问”的死板问卷。HR 会主动推断你的盲区需求，最快只需 3 轮对话即可敲定岗位架构。
 - **动态造轮子的 IT 专家** — 假如你的文案 AI 需要一个特殊的爬虫工具，你不再需要自己写代码，直接让它去找 IT 部门（呼叫 `it-support`）。IT 专家会即兴编写 TypeScript 脚本并打包为全局 Skill。
 - **自动打通通信平台** — 一键将新员工自动外派到飞书（Lark）、Telegram、Discord，并支持自动修改飞书群名等 API 联动。
-- **社会化环境向导** — 拒绝新员工“空降”。他们会在入职第一秒自动认识老板、了解公司权责图，并被强制要求向 IT 部门“拜码头”。
+- **社会化环境向导** — 拒绝新员工“空降”。他们会在入职第一秒自动认识老板、了解公司权责图，并被强制要求向 HR / IT 完成“拜码头”，只有验证通过后才算正式入职。
 - **自带大模型极客抢救机制** — 系统内置了 Watcher 守护进程，如果创建 Agent 导致底层配置文件报错，它会主动唤醒大模型（如 Claude/Gemini）进行外科手术式的 JSON 修复。
 
 ---
@@ -39,7 +39,7 @@ openclaw-hr-agent/
 ├── install.sh                  # 极简一键安装与部署门面
 ├── uninstall.sh                # 干净无残留的全局卸载工具
 ├── global-scripts/             # 全局底层守护进程
-│   └── gateway-watcher.sh      # 后台安全重启与 JSON 自愈守望者
+│   └── gateway-watcher.sh      # 部署到 ~/.openclaw/scripts/ 的后台安全重启与 JSON 自愈守望者
 ├── global-skills/              # 伴随基座安装的全局高阶技能包
 │   └── openclaw-mastery/       # 赋予 AI 对 OpenClaw 系统本体的控制力
 ├── workspace-hr/               # HR 总监的专属隔离办公区
