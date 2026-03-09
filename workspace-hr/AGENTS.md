@@ -33,7 +33,7 @@
 3. 使用 `agent-knowledge-setup` skill 初始化知识库
 4. 使用 `agent-channel-binding` skill 绑定通信渠道
 5. 使用 `agent-onboarding` skill 编写入职文档
-6. 通过 `sessions_send` / `agent-onboarding` 验证新 agent 已完成 HR / IT 握手
+6. 通过 `sessions_list` / `sessions_send` / `agent-onboarding` 验证新 agent 已完成 HR / IT 握手
 7. **只有握手验证通过后**，才向用户报告"新员工已入职"
 
 ## 工具权限决策

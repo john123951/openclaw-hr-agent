@@ -8,7 +8,7 @@ metadata: {"openclaw": {"requires": {"bins": ["openclaw", "jq"]}}}
 
 ## 概述
 
-当 AI 员工在工作中发现自己权限不足时，可以通过 `sessions_send → hr` 向 HR 发起权限申请。HR 使用本技能中封装的安全脚本处理权限变更，**绝不手动编辑 openclaw.json**。
+当 AI 员工在工作中发现自己权限不足时，应先用 `sessions_list` 找到 `agent:hr:<agentId>` 的 `sessionId`，再通过 `sessions_send(sessionKey=<sessionId>, message=...)` 向 HR 发起权限申请。HR 使用本技能中封装的安全脚本处理权限变更，**绝不手动编辑 openclaw.json**。
 
 ### 参考资料
 - **权限速查清单**：`{baseDir}/permission-catalog.md` — 所有内置工具的风险等级、适用场景、审批标准
@@ -17,7 +17,7 @@ metadata: {"openclaw": {"requires": {"bins": ["openclaw", "jq"]}}}
 ## 触发条件
 
 当收到以下类型的消息时触发：
-- 其他 Agent 通过 `sessions_send` 发来的权限申请
+- 其他 Agent 通过原生会话工具 `sessions_list + sessions_send` 发来的权限申请
 - 用户直接要求调整某个 Agent 的权限
 - 关键词：「权限」「申请」「write权限」「没有权限」「permission」「工具不够用」
 
