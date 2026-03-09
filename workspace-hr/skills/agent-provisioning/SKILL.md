@@ -10,6 +10,8 @@ metadata: {"openclaw": {"requires": {"bins": ["openclaw"]}}}
 
 在招聘方案确认后，使用 OpenClaw CLI 命令创建新 agent。**绝不手动编辑 openclaw.json**。
 
+老板确认的是整理后的业务确认单，不是 shell 脚本。完整脚本与 payload 仅用于内部执行和审计，默认**不向老板展示**。
+
 在真正执行 `openclaw agents add` 之前，先做一轮**预检**；在配置写入完成后，再做一轮**实际配置校验**。只有两轮都通过，才允许进入 Watcher 重启阶段。
 
 ### 0. 预检（失败即中止）
@@ -111,25 +113,46 @@ $HOME/.openclaw/workspace-hr/skills/agent-provisioning/scripts/hr-provision-chec
 
 `payload` 支持 `custom_sections` 扩展区块（`agents_appendix_md` / `soul_appendix_md` / `bootstrap_appendix_md`），用于在不破坏固定骨架的前提下增加个性化内容。
 
+### 步骤 4.5：审计归档（失败即中止）
+
+在真正执行任何创建动作前，你必须把**最终实际执行版本**的 shell 脚本和最终 `payload.json` 一起落盘审计。
+
+审计目录固定为：
+`workspace-hr/audit/provisioning/YYYY-MM-DD/<timestamp>-<agentId>/`
+
+```bash
+SCRIPT_FILE="/tmp/provision-<agentId>.sh"
+
+AUDIT_DIR="$($HOME/.openclaw/workspace-hr/skills/agent-provisioning/scripts/hr-provision-save-audit.sh \
+  --agent-id "<agentId>" \
+  --script "$SCRIPT_FILE" \
+  --payload "$PAYLOAD")"
+```
+
+要求：
+- `SCRIPT_FILE` 必须是本次真正要执行的完整脚本，而不是片段
+- 审计至少保存 `provision.sh` 和 `payload.json`
+- 若审计保存失败，必须中止创建并向老板说明“审计存档失败，暂未执行创建动作”
+
 ### 步骤 5：通道绑定与体验设置（如适用）
 
-如果用户指定了飞书或 Telegram 渠道，你必须在这里调用对应的安全绑定脚本。请使用你在招募阶段**自主决策**的底层调优参数（有问必答 vs 全局监控）。
+如果用户指定了飞书或 Telegram 渠道，你必须在这里调用对应的安全绑定脚本。请使用你在招募阶段**自主决策**的默认沟通方式（点名才回复 vs 主动看群回复）。
 
 #### 飞书渠道
 ```bash
-# 默认：免 @ 全局监控（强烈推荐默认配置）
+# 默认：不用特意 @ 他；他会主动看群并回复，且带上原消息
 $HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention false --reply-to all
 
-# 可选：有问必答（需要@，关闭引用）
+# 可选：点名才回复（需要 @，不带原消息）
 $HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-feishu.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
 ```
 
 #### Telegram 渠道
 ```bash
-# 默认：免 @ 全局监控
+# 默认：不用特意 @ 他；他会主动看群并回复，且带上原消息
 $HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> --require-mention false --reply-to all
 
-# 可选：有问必答
+# 可选：点名才回复
 $HOME/.openclaw/workspace-hr/skills/agent-channel-binding/scripts/hr-bind-telegram.sh <agentId> <GROUP_ID> --require-mention true --reply-to off
 ```
 
@@ -191,7 +214,8 @@ $HOME/.openclaw/workspace-hr/skills/agent-onboarding/scripts/hr-verify-handshake
 
 ## 安全规则
 
-- **执行前展示脚本给用户确认**
+- **执行前先向老板展示业务确认单，不要展示脚本**
+- **最终执行脚本和 payload 必须先通过 `hr-provision-save-audit.sh` 落盘审计**
 - 使用 `set -euo pipefail` 保护脚本
 - 不在脚本中硬编码密钥或 token
 - 失败时停止并报告，不静默继续
