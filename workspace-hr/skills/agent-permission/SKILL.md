@@ -44,8 +44,9 @@ $HOME/.openclaw/workspace-hr/skills/agent-permission/scripts/hr-permission-check
 | `exec` | ✅ 大多数岗位 | — |
 | `memory_search` / `memory_get` | ✅ | — |
 | `sessions_spawn` | ⚠️ 需确认理由 | ⚠️ 一般需老板确认 |
-| `cron` | ✅ 定时任务类 | ⚠️ 其他岗位 |
 | `canvas` / `nodes` | — | ❌ 一般不授予 |
+
+> **注意**：`cron` 是 CLI 子命令，不是 `tools.allow` 中的权限。若需要定时任务功能，由 HR 在岗位描述中注明，招聘后由 IT/管理员手动配置。
 
 **判断原则**：
 - 参考 `{baseDir}/../../templates/jobs/job-profiles.json` 中该岗位的推荐权限

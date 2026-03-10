@@ -22,14 +22,12 @@ $HOME/.openclaw/workspace-hr/skills/agent-provisioning/scripts/hr-provision-pref
   --allow-tools <tool1,tool2,...> \
   --deny-tools <tool1,tool2,...> \
   --channel <feishu|telegram|discord> \
-  --group-id <GROUP_ID> \
-  --exec-host <gateway|sandbox>
+  --group-id <GROUP_ID>
 ```
 
 重点检查：
 - 模型是否真的存在于 `openclaw models status` 的 `allowed` 列表
 - 生命线权限是否齐全
-- `exec` 是否显式设置宿主（`gateway` / `sandbox`）
 - 若用飞书 / Telegram 群绑定，是否提供了明确群组 ID
 - HR / IT 会话是否已可见（若暂不可见，会提示由 Watcher 重启后激活）
 
@@ -67,9 +65,7 @@ openclaw config get agents.list
 # 设置模型
 openclaw config set "agents.list[<INDEX>].model" "<model>"
 
-# 若 allow 中包含 exec，必须显式设置 exec host。
-# 对大多数业务员工，推荐优先使用 gateway，除非你确认 sandbox runtime 已启用并健康。
-openclaw config set "agents.list[<INDEX>].tools.exec.host" '"gateway"' --strict-json
+# 若 allow 中包含 exec，OpenClaw 默认使用 sandbox，无需额外配置
 
 # 设置工具权限（根据岗位模板）
 # ⚠️ 基线权限必须始终包含！
@@ -77,7 +73,7 @@ openclaw config set "agents.list[<INDEX>].tools.exec.host" '"gateway"' --strict-
 #   - sessions_list/send/history: 呼叫 HR/IT 求助的"生命线"
 #   - web_fetch: 上网查资料的基本能力
 openclaw config set "agents.list[<INDEX>].tools.allow" \
-  '["exec","read","write","edit","web_fetch","cron","sessions_list","sessions_send","sessions_history","memory_search","memory_get","message"]' --strict-json
+  '["exec","read","write","edit","web_fetch","sessions_list","sessions_send","sessions_history","memory_search","memory_get","message"]' --strict-json
 openclaw config set "agents.list[<INDEX>].tools.deny" \
   '["browser","canvas","nodes","sessions_spawn"]' --strict-json
 ```
@@ -171,7 +167,6 @@ $HOME/.openclaw/workspace-hr/skills/agent-provisioning/scripts/hr-provision-veri
   --agent-id <agentId> \
   --allow-tools <tool1,tool2,...> \
   --deny-tools <tool1,tool2,...> \
-  --exec-host <gateway|sandbox> \
   --channel <feishu|telegram|discord> \
   --group-id <GROUP_ID> \
   --require-mention <true|false> \

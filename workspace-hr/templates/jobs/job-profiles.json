@@ -13,7 +13,7 @@
       "successFactors": ["稳定的数据源", "明确的播报时间", "简洁的输出格式"],
       "failurePatterns": ["数据源不稳定导致播报失败", "播报过于冗长", "未及时更新数据"],
       "tools": {
-        "allow": ["exec", "read", "write", "edit", "web_fetch", "cron", "sessions_list", "sessions_send", "sessions_history", "memory_search", "memory_get", "message"],
+        "allow": ["exec", "read", "write", "edit", "web_fetch", "sessions_list", "sessions_send", "sessions_history", "memory_search", "memory_get", "message"],
         "deny": ["browser", "canvas", "nodes", "sessions_spawn"]
       },
       "knowledgeFocus": "气象与天气预报",
@@ -36,7 +36,7 @@
       "successFactors": ["明确的监控标的", "合理的告警阈值", "及时的通知"],
       "failurePatterns": ["告警阈值设置不合理导致频繁或遗漏告警", "数据源延迟"],
       "tools": {
-        "allow": ["exec", "read", "write", "edit", "web_fetch", "cron", "browser", "sessions_list", "sessions_send", "sessions_history", "memory_search", "memory_get", "message"],
+        "allow": ["exec", "read", "write", "edit", "web_fetch", "browser", "sessions_list", "sessions_send", "sessions_history", "memory_search", "memory_get", "message"],
         "deny": ["canvas", "nodes", "sessions_spawn"]
       },
       "knowledgeFocus": "股票市场与技术分析",
@@ -105,7 +105,7 @@
       "successFactors": ["明确的运营目标", "稳定的内容来源", "数据驱动的决策"],
       "failurePatterns": ["内容发布未经审核", "数据解读偏差", "过度承诺增长效果"],
       "tools": {
-        "allow": ["exec", "read", "write", "edit", "web_fetch", "browser", "cron", "sessions_list", "sessions_send", "sessions_history", "memory_search", "memory_get", "message"],
+        "allow": ["exec", "read", "write", "edit", "web_fetch", "browser", "sessions_list", "sessions_send", "sessions_history", "memory_search", "memory_get", "message"],
         "deny": ["canvas", "nodes", "sessions_spawn"]
       },
       "knowledgeFocus": "用户运营与增长策略",

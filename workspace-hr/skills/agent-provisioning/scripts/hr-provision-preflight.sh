@@ -18,11 +18,10 @@ usage() {
     --allow-tools <tool1,tool2,...> \
     [--deny-tools <tool1,tool2,...>] \
     [--channel feishu|telegram|discord] \
-    [--group-id <peer-id>] \
-    [--exec-host gateway|sandbox]
+    [--group-id <peer-id>]
 
 说明:
-  - 若 allow-tools 中包含 exec，则必须显式提供 --exec-host
+  - OpenClaw 默认使用 sandbox 作为 exec host，无需额外配置
   - 该脚本只做招聘前预检，不修改任何配置
 EOF
 }
@@ -129,19 +128,11 @@ fi
 
 HAS_EXEC="$(echo "$ALLOW_JSON" | jq -r 'index("exec") != null')"
 SANDBOX_MODE="$(openclaw config get agents.defaults.sandbox.mode 2>/dev/null | tail -n 1 | tr -d '"' || true)"
-if [ "$HAS_EXEC" = "true" ]; then
-  if [ -z "$EXEC_HOST" ]; then
-    add_error "allow-tools 包含 exec 时，必须显式指定 --exec-host gateway|sandbox"
-  elif [ "$EXEC_HOST" != "gateway" ] && [ "$EXEC_HOST" != "sandbox" ]; then
+if [ "$HAS_EXEC" = "true" ] && [ -n "$EXEC_HOST" ]; then
+  if [ "$EXEC_HOST" != "gateway" ] && [ "$EXEC_HOST" != "sandbox" ]; then
     add_error "不支持的 exec-host: ${EXEC_HOST}"
   elif [ "$EXEC_HOST" = "sandbox" ] && [ "$SANDBOX_MODE" != "all" ] && [ "$SANDBOX_MODE" != "non-main" ]; then
-    add_error "exec-host=sandbox，但 agents.defaults.sandbox.mode 未启用 all / non-main"
-  fi
-fi
-
-if echo "$ALLOW_JSON" | jq -e 'index("cron") != null' >/dev/null; then
-  if ! openclaw cron list --json >/dev/null 2>&1; then
-    add_warning "岗位需要 cron，但当前 Gateway 的 cron 调度器不可用或未就绪"
+    add_warning "exec-host=sandbox，但 agents.defaults.sandbox.mode 未启用 all / non-main，可能无法使用 exec"
   fi
 fi
 

@@ -19,11 +19,13 @@ usage() {
     --agent-id <agent-id> \
     --allow-tools <tool1,tool2,...> \
     [--deny-tools <tool1,tool2,...>] \
-    [--exec-host gateway|sandbox] \
     [--channel feishu|telegram|discord] \
     [--group-id <peer-id>] \
     [--require-mention true|false] \
     [--reply-to all|first|off]
+
+说明:
+  - OpenClaw 默认使用 sandbox 作为 exec host，验证时无需检查
 EOF
 }
 
