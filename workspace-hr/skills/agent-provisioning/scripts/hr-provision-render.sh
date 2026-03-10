@@ -135,7 +135,16 @@ replace_token "${WORKSPACE}/BOOTSTRAP.md" "AGENT_ROLE" "$agent_role"
 replace_token "${WORKSPACE}/BOOTSTRAP.md" "SAFETY_RULES" "$safety_rules"
 replace_token "${WORKSPACE}/BOOTSTRAP.md" "BOOTSTRAP_APPENDIX_MD" "$bootstrap_appendix_md"
 
+# 创建 projects 目录和初始文件
+if [ -d "${TEMPLATE_DIR}/projects" ]; then
+  mkdir -p "${WORKSPACE}/projects"
+  cp -r "${TEMPLATE_DIR}/projects/"* "${WORKSPACE}/projects/" 2>/dev/null || true
+fi
+
 echo "✅ 模板渲染完成:"
 echo "  - ${WORKSPACE}/AGENTS.md"
 echo "  - ${WORKSPACE}/SOUL.md"
 echo "  - ${WORKSPACE}/BOOTSTRAP.md"
+if [ -d "${WORKSPACE}/projects" ]; then
+  echo "  - ${WORKSPACE}/projects/"
+fi

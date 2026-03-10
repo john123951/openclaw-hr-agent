@@ -3,7 +3,6 @@
 
 set -euo pipefail
 
-MODEL=""
 ALLOW_TOOLS=""
 DENY_TOOLS=""
 CHANNEL=""
@@ -14,13 +13,13 @@ usage() {
   cat <<'EOF'
 用法:
   hr-provision-preflight.sh \
-    --model <model-id> \
     --allow-tools <tool1,tool2,...> \
     [--deny-tools <tool1,tool2,...>] \
     [--channel feishu|telegram|discord] \
     [--group-id <peer-id>]
 
 说明:
+  - 新员工使用 OpenClaw 默认模型，无需在招聘时指定
   - OpenClaw 默认使用 sandbox 作为 exec host，无需额外配置
   - 该脚本只做招聘前预检，不修改任何配置
 EOF
@@ -28,10 +27,6 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --model)
-      MODEL="${2:-}"
-      shift 2
-      ;;
     --allow-tools)
       ALLOW_TOOLS="${2:-}"
       shift 2
@@ -64,8 +59,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [ -z "$MODEL" ] || [ -z "$ALLOW_TOOLS" ]; then
-  echo "❌ 缺少必填参数 --model 或 --allow-tools"
+if [ -z "$ALLOW_TOOLS" ]; then
+  echo "❌ 缺少必填参数 --allow-tools"
   usage
   exit 1
 fi
@@ -120,11 +115,6 @@ done < <(
     $allow[] as $tool | select(($deny | index($tool)) != null) | $tool
   '
 )
-
-MODELS_JSON="$(openclaw models status --json 2>/dev/null || echo '{}')"
-if ! echo "$MODELS_JSON" | jq -e --arg model "$MODEL" '(.allowed // []) | index($model) != null' >/dev/null; then
-  add_error "模型未出现在 openclaw models 的 configured / allowed 列表中: ${MODEL}"
-fi
 
 HAS_EXEC="$(echo "$ALLOW_JSON" | jq -r 'index("exec") != null')"
 SANDBOX_MODE="$(openclaw config get agents.defaults.sandbox.mode 2>/dev/null | tail -n 1 | tr -d '"' || true)"
@@ -194,7 +184,6 @@ if [ "${#ERRORS[@]}" -gt 0 ]; then
 fi
 
 echo "✅ Provision 预检通过"
-echo "  - model: ${MODEL}"
 echo "  - allow-tools: ${ALLOW_TOOLS}"
 if [ -n "$EXEC_HOST" ]; then
   echo "  - exec-host: ${EXEC_HOST}"

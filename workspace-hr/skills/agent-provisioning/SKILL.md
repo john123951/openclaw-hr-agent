@@ -18,7 +18,6 @@ metadata: {"openclaw": {"requires": {"bins": ["openclaw"]}}}
 
 ```bash
 $HOME/.openclaw/workspace-hr/skills/agent-provisioning/scripts/hr-provision-preflight.sh \
-  --model <model> \
   --allow-tools <tool1,tool2,...> \
   --deny-tools <tool1,tool2,...> \
   --channel <feishu|telegram|discord> \
@@ -26,10 +25,11 @@ $HOME/.openclaw/workspace-hr/skills/agent-provisioning/scripts/hr-provision-pref
 ```
 
 重点检查：
-- 模型是否真的存在于 `openclaw models status` 的 `allowed` 列表
 - 生命线权限是否齐全
 - 若用飞书 / Telegram 群绑定，是否提供了明确群组 ID
 - HR / IT 会话是否已可见（若暂不可见，会提示由 Watcher 重启后激活）
+
+> **注意**：新员工使用 OpenClaw 默认模型，无需在招聘时指定。
 
 ## 创建流程
 
@@ -51,7 +51,7 @@ openclaw agents set-identity --agent <agentId> \
   --name "<Agent名称>" --emoji "<Emoji>"
 ```
 
-### 步骤 3：配置模型和工具权限
+### 步骤 3：配置工具权限
 
 先查找 agent 在 `agents.list` 中的索引：
 
@@ -62,8 +62,7 @@ openclaw config get agents.list
 然后用索引设置配置：
 
 ```bash
-# 设置模型
-openclaw config set "agents.list[<INDEX>].model" "<model>"
+# 新员工使用 OpenClaw 默认模型，无需额外配置
 
 # 若 allow 中包含 exec，OpenClaw 默认使用 sandbox，无需额外配置
 
