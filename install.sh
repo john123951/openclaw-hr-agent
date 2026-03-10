@@ -78,6 +78,12 @@ deploy_global_skills() {
         echo -e "  ${BLUE}[+] 正在挂载底层守护进程 (Global Scripts)...${NC}"
         mkdir -p "$HOME/.openclaw/scripts"
         cp "$PROJECT_DIR/global-scripts/"* "$HOME/.openclaw/scripts/"
+        for script in "$HOME/.openclaw/scripts/"*.sh; do
+            if ! bash -n "$script"; then
+                echo -e "  ${RED}✗${NC} 脚本语法校验失败: $script"
+                exit 1
+            fi
+        done
         echo -e "  ${GREEN}✓${NC} global-scripts/ (守护程序已全系统部署)"
     fi
 }
@@ -186,8 +192,8 @@ deploy_hr_agent() {
     echo -e "  ${GREEN}✓${NC} HR 工作台档案部署完毕 ($HR_WORKSPACE)"
     
     if [ "$skip_init" == "false" ]; then
-        echo -e "  ${YELLOW}💡 为激活 HR 职能，请先使用系统监控 Watcher 进行安全重启：${NC}"
-        echo -e "     nohup $HOME/.openclaw/scripts/gateway-watcher.sh hr provision > /tmp/watcher.log 2>&1 &"
+        echo -e "  ${YELLOW}💡 为激活 HR 职能，请先校验 Watcher 再后台启动：${NC}"
+        echo -e "     bash -n \"$HOME/.openclaw/scripts/gateway-watcher.sh\" && nohup $HOME/.openclaw/scripts/gateway-watcher.sh hr provision > /tmp/watcher.log 2>&1 &"
     fi
 }
 

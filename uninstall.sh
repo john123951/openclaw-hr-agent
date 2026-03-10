@@ -56,6 +56,11 @@ remove_global_skills() {
         rm -f "$HOME/.openclaw/scripts/gateway-watcher.sh"
         echo -e "  ${GREEN}✓${NC} 已移除守护进程: gateway-watcher.sh"
     fi
+
+    if [ -f "$HOME/.openclaw/scripts/hr-infra-warmup.sh" ]; then
+        rm -f "$HOME/.openclaw/scripts/hr-infra-warmup.sh"
+        echo -e "  ${GREEN}✓${NC} 已移除基础设施预热脚本: hr-infra-warmup.sh"
+    fi
 }
 
 # ==============================================================================

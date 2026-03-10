@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-AGENT_ID=$1
+AGENT_ID="${1:-}"
 ACTION=${2:-provision}
 WORKSPACE_DIR="$HOME/.openclaw/workspace-${AGENT_ID}"
 WAKE_MARKER="$WORKSPACE_DIR/.watcher-last-wake"
@@ -21,7 +21,8 @@ OPENCLAW_CONFIG="$HOME/.openclaw/openclaw.json"
 OPENCLAW_BACKUP="$HOME/.openclaw/openclaw.json.hr_backup"
 
 echo "[$(date)] [Watcher] Watcher 进程启动，接管重启流程 (PID: $$)"
-echo "[$(date)] [Watcher] 目标新员工: $AGENT_ID"
+echo "[$(date)] [Watcher] 目标对象: $AGENT_ID"
+echo "[$(date)] [Watcher] Action: $ACTION"
 
 # 1. 创建安全快照
 if [ -f "$OPENCLAW_CONFIG" ]; then
@@ -44,7 +45,7 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     
     # 尝试启动或重启 Gateway 并捕获输出（优先使用 install + start，如果已存在则 fallback 给 restart）
     echo "[$(date)] [Watcher] 执行 Gateway 唤醒指令..."
-    (openclaw gateway install && openclaw gateway start || openclaw gateway restart) > /tmp/gateway_restart_out.log 2>&1 || true
+    openclaw doctor --fix && openclaw gateway restart > /tmp/gateway_restart_out.log 2>&1 || true
     
     # 等待系统初始化
     sleep 8
@@ -103,7 +104,7 @@ done
 if [ "$GATEWAY_ALIVE" = false ]; then
     echo "[$(date)] [Watcher] 💥 灾难级故障！自愈失败，执行紧急回滚！"
     cp "$OPENCLAW_BACKUP" "$OPENCLAW_CONFIG"
-    openclaw gateway restart
+    openclaw doctor --fix && openclaw gateway restart
     exit 1
 fi
 
@@ -118,28 +119,28 @@ fi
 #
 # 升级路径: 当 OpenClaw 提供以下原生能力后应移除此逻辑：
 #   1. 会话预热 API: openclaw sessions warmup --agent hr
-#   2. Agent 创建后 Hook: openclaw agents add --on-create-hook “script.sh”
+#   2. Agent 创建后 Hook: openclaw agents add --on-create-hook "script.sh"
 #
 # 追踪: 见 docs/openclaw-feature-requests.md
 #
 # 独立模块: 已提取为 hr-infra-warmup.sh，此处在过渡期调用
 # ============================================================================
-if [ “$ACTION” = “provision” ]; then
-    echo “[$(date)] [Watcher] 💓 正在激活基础设施心跳 (HR/IT)...”
+if [ "$ACTION" = "provision" ]; then
+    echo "[$(date)] [Watcher] 💓 正在激活基础设施心跳 (HR/IT)..."
     # 调用独立的预热脚本 (技术债务：未来应使用 OpenClaw 原生 API)
-    if [ -x “$HOME/.openclaw/scripts/hr-infra-warmup.sh” ]; then
-        “$HOME/.openclaw/scripts/hr-infra-warmup.sh” --agents hr,it-support --new-agent “$AGENT_ID” --timeout 30
+    if [ -x "$HOME/.openclaw/scripts/hr-infra-warmup.sh" ]; then
+        "$HOME/.openclaw/scripts/hr-infra-warmup.sh" --agents hr,it-support --new-agent "$AGENT_ID" --timeout 30
     else
         # Fallback: 内联实现 (向后兼容)
-        echo “[$(date)] [Watcher] ⚠️ hr-infra-warmup.sh 未找到，使用内联实现”
-        openclaw agent --agent hr --message “[SYSTEM] Session warmup for new agent: ${AGENT_ID}” > /dev/null 2>&1 &
-        openclaw agent --agent it-support --message “[SYSTEM] Session warmup for new agent: ${AGENT_ID}” > /dev/null 2>&1 &
+        echo "[$(date)] [Watcher] ⚠️ hr-infra-warmup.sh 未找到，使用内联实现"
+        openclaw agent --agent hr --message "[SYSTEM] Session warmup for new agent: ${AGENT_ID}" > /dev/null 2>&1 &
+        openclaw agent --agent it-support --message "[SYSTEM] Session warmup for new agent: ${AGENT_ID}" > /dev/null 2>&1 &
 
         for _ in $(seq 1 15); do
             SESSION_JSON=$(openclaw sessions --all-agents --active 1440 --json 2>/dev/null || echo '{}')
-            if echo “$SESSION_JSON” | jq -e '.sessions[]? | select(.key == “agent:hr:main”)' >/dev/null \
-              && echo “$SESSION_JSON” | jq -e '.sessions[]? | select(.key == “agent:it-support:main”)' >/dev/null; then
-                echo “[$(date)] [Watcher] ✅ HR / IT 主会话已就绪，可供新员工握手。”
+            if echo "$SESSION_JSON" | jq -e '.sessions[]? | select(.key == "agent:hr:main")' >/dev/null \
+              && echo "$SESSION_JSON" | jq -e '.sessions[]? | select(.key == "agent:it-support:main")' >/dev/null; then
+                echo "[$(date)] [Watcher] ✅ HR / IT 主会话已就绪，可供新员工握手。"
                 break
             fi
             sleep 2

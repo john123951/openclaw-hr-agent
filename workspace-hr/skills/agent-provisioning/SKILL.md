@@ -186,8 +186,12 @@ Gateway 重启后你的进程会被杀掉，系统将由 Watcher 接管。
 新版 Watcher 将自动执行 **“基础设施心跳” (Infrastructure Heartbeat)**，强制苏醒 HR 和 IT，确保新员工在执行 `BOOTSTRAP.md` 时能立即在会话列表中查看到同事。
 
 ```bash
+bash -n "$HOME/.openclaw/scripts/gateway-watcher.sh"
+[ ! -f "$HOME/.openclaw/scripts/hr-infra-warmup.sh" ] || bash -n "$HOME/.openclaw/scripts/hr-infra-warmup.sh"
 nohup $HOME/.openclaw/scripts/gateway-watcher.sh <agentId> provision > /tmp/watcher.log 2>&1 &
 ```
+
+若任一语法校验失败，必须中止并向老板说明“后台重启器自检失败，暂未执行重启”。
 
 执行后，立即回复用户："✅ 新同事 <Agent名称> 的档案已建好！系统正由 Watcher 接管，将在后台进行安全校验、重启与入职握手验证。握手闭环完成后，我再向您确认他已正式入职。"
 

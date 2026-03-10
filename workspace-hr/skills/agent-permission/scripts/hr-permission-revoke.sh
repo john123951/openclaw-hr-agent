@@ -88,7 +88,16 @@ fi
 if [ "$DO_RESTART" = "true" ]; then
     echo "[Permission Revoke] 🔄 正在通过 Watcher 安全重启 Gateway..."
     WATCHER_SCRIPT="$HOME/.openclaw/scripts/gateway-watcher.sh"
+    WARMUP_SCRIPT="$HOME/.openclaw/scripts/hr-infra-warmup.sh"
     if [ -f "$WATCHER_SCRIPT" ]; then
+        if ! bash -n "$WATCHER_SCRIPT"; then
+            echo "[Permission Revoke] ❌ Watcher 脚本语法校验失败，已中止后台重启。"
+            exit 1
+        fi
+        if [ -f "$WARMUP_SCRIPT" ] && ! bash -n "$WARMUP_SCRIPT"; then
+            echo "[Permission Revoke] ❌ 基础设施预热脚本语法校验失败，已中止后台重启。"
+            exit 1
+        fi
         nohup "$WATCHER_SCRIPT" "$AGENT_ID" permission-update > /tmp/watcher.log 2>&1 &
         echo "[Permission Revoke] ✅ Watcher 已启动，Gateway 将在后台安全重启。"
     else

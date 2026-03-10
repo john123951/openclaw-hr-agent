@@ -55,6 +55,8 @@ openclaw agents delete --force "$AGENT_ID"
 $HOME/.openclaw/workspace-hr/skills/agent-dismissal/scripts/cleanup-cron.sh "$AGENT_ID"
 
 # 4. 异步安全重启系统生效 (由 Watcher 守护)
+bash -n "$HOME/.openclaw/scripts/gateway-watcher.sh"
+[ ! -f "$HOME/.openclaw/scripts/hr-infra-warmup.sh" ] || bash -n "$HOME/.openclaw/scripts/hr-infra-warmup.sh"
 nohup $HOME/.openclaw/scripts/gateway-watcher.sh "$AGENT_ID" dismiss > /tmp/watcher.log 2>&1 &
 ```
 
