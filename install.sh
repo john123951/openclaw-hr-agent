@@ -168,13 +168,11 @@ deploy_hr_agent() {
         # 获取索引并设置工具锁
         AGENT_INDEX=$(openclaw config get agents.list | jq '[.[].id] | index("hr")')
         # HR 绝不应该有危险的 write 和 browser 权限，但引入 memory 和 subagent 能力
-        openclaw config set "agents.list[$AGENT_INDEX].tools.allow" '["read","exec","sessions_spawn","sessions_list","sessions_send","sessions_history","agents_list","memory_search","memory_get","message","web_fetch"]' --strict-json
-        openclaw config set "agents.list[$AGENT_INDEX].tools.deny" '["write","edit","browser","canvas","nodes"]' --strict-json
-        # HR 需要运行 shell 脚本（创建新 Agent 的关键能力），必须显式设置 exec 主机为 gateway
-        openclaw config set "agents.list[$AGENT_INDEX].tools.exec.host" '"gateway"' --strict-json
+        openclaw config set "agents.list[$AGENT_INDEX].tools.allow" '["read","write","edit","exec","sessions_spawn","sessions_list","sessions_send","sessions_history","agents_list","memory_search","memory_get","message","web_fetch","browser","gateway"]' --strict-json
+        openclaw config set "agents.list[$AGENT_INDEX].tools.deny" '["canvas","nodes"]' --strict-json
         
         # 优化：添加 groupChat.mentionPatterns 提升群聊唤醒体验
-        openclaw config set "agents.list[$AGENT_INDEX].groupChat.mentionPatterns" '["@hr", "@HR", "@招聘官", "@招人", "@招聘", "@hr-support", "@人事"]' --strict-json
+        openclaw config set "agents.list[$AGENT_INDEX].groupChat.mentionPatterns" '["@hr", "@HR", "@hr-support", "@招聘官", "@招人", "@招聘", "@人事"]' --strict-json
         
         # 优化：赋予 HR 调度和协同配置中其他 Agent（例如招聘）的能力
         openclaw config set "agents.list[$AGENT_INDEX].subagents.allowAgents" '["*"]' --strict-json
@@ -220,11 +218,9 @@ deploy_it_agent() {
         # IT 必须拥有最高文件写入权和外围执行权！
         openclaw config set "agents.list[$AGENT_INDEX].tools.allow" '["read","write","edit","exec","sessions_spawn","sessions_list","sessions_send","sessions_history","agents_list","memory_search","memory_get","message","web_fetch","browser"]' --strict-json
         openclaw config set "agents.list[$AGENT_INDEX].tools.deny" '["canvas","nodes"]' --strict-json
-        # IT 需要高权限 exec 执行 shell 脚本，必须显式设置 exec 主机为 gateway
-        openclaw config set "agents.list[$AGENT_INDEX].tools.exec.host" '"gateway"' --strict-json
         
         # 优化：添加 groupChat.mentionPatterns 提升群聊唤醒体验
-        openclaw config set "agents.list[$AGENT_INDEX].groupChat.mentionPatterns" '["@it", "@IT", "@网管", "@it-support"]' --strict-json
+        openclaw config set "agents.list[$AGENT_INDEX].groupChat.mentionPatterns" '["@it", "@IT", "@it-support", "@网管", "@运维"]' --strict-json
         
         bind_agent_to_channel "it-support"
     fi
@@ -236,7 +232,7 @@ deploy_it_agent() {
     mkdir -p "$IT_WORKSPACE"
     cp -r "$PROJECT_DIR/workspace-it/"* "$IT_WORKSPACE/"
     
-    echo -e "  ${GREEN}✓${NC} IT 黑客台档案部署完毕 ($IT_WORKSPACE)"
+    echo -e "  ${GREEN}✓${NC} IT 支持岗档案部署完毕 ($IT_WORKSPACE)"
     
     # 动态挂载外部核心工具 (如 skill-creator)
     echo -e "  ${BLUE}[+] 正在通过 npx 挂载外部依赖技能 (skill-creator)...${NC}"
