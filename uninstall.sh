@@ -114,7 +114,7 @@ remove_it_agent() {
 
     if [ -d "$IT_WORKSPACE" ]; then
         rm -rf "$IT_WORKSPACE"
-        echo -e "  ${GREEN}✓${NC} IT 黑客台档案物理销毁完毕 ($IT_WORKSPACE)"
+        echo -e "  ${GREEN}✓${NC} IT 支持岗档案物理销毁完毕 ($IT_WORKSPACE)"
     fi
 }
 
