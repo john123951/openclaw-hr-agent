@@ -45,7 +45,7 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     
     # 尝试启动或重启 Gateway 并捕获输出（优先使用 install + start，如果已存在则 fallback 给 restart）
     echo "[$(date)] [Watcher] 执行 Gateway 唤醒指令..."
-    openclaw doctor --fix && openclaw gateway restart > /tmp/gateway_restart_out.log 2>&1 || true
+    openclaw doctor --fix && openclaw gateway install --force && openclaw gateway restart > /tmp/gateway_restart_out.log 2>&1 || true
     
     # 等待系统初始化
     sleep 8
@@ -104,7 +104,7 @@ done
 if [ "$GATEWAY_ALIVE" = false ]; then
     echo "[$(date)] [Watcher] 💥 灾难级故障！自愈失败，执行紧急回滚！"
     cp "$OPENCLAW_BACKUP" "$OPENCLAW_CONFIG"
-    openclaw doctor --fix && openclaw gateway restart
+    openclaw doctor --fix && openclaw gateway install --force && openclaw gateway restart
     exit 1
 fi
 
